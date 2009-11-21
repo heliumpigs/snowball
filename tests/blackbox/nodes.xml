@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright 2009 Yusuf Simonson
+  This file is part of Snowball.
+  
+  Snowball is free software: you can redistribute it and/or modify it under the
+  terms of the GNU Affero General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
+
+  Snowball is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<test>
+    
+<!-- Testing POST -->
+
+<testcase>
+<name>POST a node with tags</name>
+<requestMethod>POST</requestMethod>
+<requestURL>http://localhost:8080/nodes</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag1 tag2</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id']
+assert len(json['tags']) == 2
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>POST a node without tags</name>
+<requestMethod>POST</requestMethod>
+<requestURL>http://localhost:8080/nodes</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id']
+assert len(json['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<!-- Testing PUT -->
+
+<testcase>
+<name>PUT a node without tags</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id'] == 'blackbox1'
+assert len(json['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT a node with tags</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag1 tag2</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id'] == 'blackbox1'
+assert len(json['tags']) == 2
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+</expectedOutput>
+</testcase>
+
+<!-- Testing to make sure you cannot overwrite another account's node -->
+
+<testcase>
+<name>testing security of node PUT (step 1)</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox2</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>testing security of node PUT (step 2)</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox2</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag1 tag2</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- Testing GET -->
+
+<testcase>
+<name>GET a node owned by the account</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id'] == 'blackbox1'
+assert len(json['tags']) == 2
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET a node not owned by the account</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox2</requestURL>
+<headers />
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'blackbox2'
+assert json['type'] == 'node'
+assert json['id'] == 'blackbox2'
+assert len(json['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET a node that doesn't exist</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/nodes/nothere</requestURL>
+<headers />
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- Testing DELETE -->
+
+<testcase>
+<name>DELETE a node that doesn't exist</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/nothere</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE a node that the account owns</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE a node that the account doesn't own</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox2</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+
+<!-- Testing cascading DELETE -->
+
+<testcase>
+<name>cascading DELETE (step 1)</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>cascading DELETE (step 2)</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/blackbox1/blackbox2</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>1.0</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>cascading DELETE (step 3)</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox2</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>cascading DELETE (step 4)</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+assert json['links'] == {}
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>cascading DELETE (step 5)</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+
+</test>

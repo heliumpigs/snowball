@@ -1,0 +1,26 @@
+1. Install Python 2.6. It should work on other versions of Python, but it has
+   only been tested on this version so far.
+
+2. Install MySQL <http://dev.mysql.com/downloads/>
+
+3. Install Tornado <http://www.tornadoweb.org/>
+
+4. Install httplib2 <http://code.google.com/p/httplib2/>
+
+5. Install iso8601 <http://pypi.python.org/pypi/iso8601>
+
+6. Install oz <http://github.com/ysimonson/oz/>
+
+7. Install scarecrow <http://github.com/ysimonson/scarecrow>
+
+8. Create a new database in MySQL
+
+9. Configure your database settings in settings/blackbox.py
+
+10. Run setup:
+      python setup.py blackbox db testusers
+    This will initialize the database schema and add the users for testing
+
+11. Run the server:
+      python setup.py blackbox -dbpass
+    Enter your database password. The server is now running!

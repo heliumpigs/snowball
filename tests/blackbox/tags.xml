@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<test>
+    
+<!--
+  Copyright 2009 Michael Whidby
+  This file is part of Snowball.
+  
+  Snowball is free software: you can redistribute it and/or modify it under the
+  terms of the GNU Affero General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
+
+  Snowball is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- Setting up some nodes to work with -->
+<testcase>
+<name>PUT a node without tags</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert len(json['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<!-- Testing PUT -->
+<testcase>
+<name>PUT a sample tag, node DNE</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/tags/nothere</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag1 tag2</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT a sample node, no tags</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 400, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT an update to a node, valid</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag1 tag2</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert len(json['tags']) == 2
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT another update to a node, valid</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag3</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['owner'] == 'blackbox1'
+assert json['type'] == 'node'
+assert json['id']
+assert len(json['tags']) == 3
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+assert 'tag3' in json['tags']
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT an update to a node, not user's node</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody>
+    <tags>tag4</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- Testing GET -->
+<testcase>
+<name>GET tags, node DNE</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET tags, node exists</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['owner'] == 'blackbox1'
+assert len(json['tags']) == 3
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+assert 'tag3' in json['tags']
+</expectedOutput>
+</testcase>
+
+<!-- Testing DELETE -->
+
+<testcase>
+<name>DELETE tags, node DNE</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, user has no access</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, node DNE</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, tags specified STEP ONE</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>tag3</tags>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, tags specified STEP TWO</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert len(json['tags']) == 2
+assert 'tag1' in json['tags']
+assert 'tag2' in json['tags']
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, no tags specified STEP ONE</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE tags, no tags specified STEP TWO</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert len(json['tags']) == 0
+</expectedOutput>
+</testcase>
+
+</test>
+

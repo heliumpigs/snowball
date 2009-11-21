@@ -1,0 +1,114 @@
+body, * {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #6C6C6C;
+    line-height: 1.5em;
+}
+
+a {
+    color: #00A7DF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+}
+
+h2 {
+    background-color: #111111;
+    color: white;
+    font-size: 14px;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    margin: 0;
+}
+
+textarea {
+    width: 100%;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+input {
+    width: 80%;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: left;
+}
+
+#header {
+    margin-top: 0.5em;
+    height: 45px;
+}
+
+#header span {
+    color: #111111;
+}
+
+#mainheader {
+    font-weight: bold;
+}
+
+#tabs ul {
+    margin-top: 0.5em;
+    text-align: right;
+}
+
+#tabs li {
+    display: inline;
+    margin: 0 1em 0 0;
+    border: 0;
+}
+
+#copy {
+    padding-top: 1em;
+    font-family: Verdana;
+    font-size: 10px;
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+a.button {
+    color: white;
+    background-color: #111111;
+    padding: 0.5em 0.75em 0.5em 0.75em;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a.button:hover {
+    color: #111111;
+    background-color: white;
+}
+
+.attrHeader {
+    width: 100px;
+}
+
+.attrValue {
+    overflow: hidden;
+}
+
+.zebra {
+    background-color: #DDDDDD;
+}
+
+.button {
+    width: 86px;
+    margin-right: 1em;
+}

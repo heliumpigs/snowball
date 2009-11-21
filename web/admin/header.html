@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!--
+  Copyright 2009 Yusuf Simonson
+  This file is part of Snowball.
+  
+  Snowball is free software: you can redistribute it and/or modify it under the
+  terms of the GNU Affero General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
+
+  Snowball is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>snowball | {{ page }}</title>
+        
+        <link rel="stylesheet" type="text/css" media="all" href="{{ static_url('style/jquery-ui.css') }}" />
+        <link rel="stylesheet" type="text/css" media="all" href="{{ static_url('style/reset.css') }}" />
+        <link rel="stylesheet" type="text/css" media="all" href="{{ static_url('style/text.css') }}" />
+        <link rel="stylesheet" type="text/css" media="all" href="{{ static_url('style/960.css') }}" />
+        <link rel="stylesheet" type="text/css" media="all" href="{{ static_url('style/main.css') }}" />
+        
+        <script type="text/javascript" src="{{ static_url('script/jquery.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/jquery-ui.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/json.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/client.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/' + page + '.js') }}"></script>
+    </head>
+    <body>
+        <div id="dialog" title="dialog"></div>
+        
+        <div class="container_12">
+            <div id="header" class="grid_4">
+                snowball &raquo; {{ page }}
+            </div>
+            <div id="tabs" class="grid_8">
+                <ul>
+                    <li><a href="/admin/nodes">nodes</a></li>
+                    <li><a href="/admin/links">links</a></li>
+                    <li><a href="/admin/recommendations">recommendations</a></li>
+                    <li><a href="/admin/accounts">accounts</a></li>
+                </ul>
+            </div>
+            <div class="clear"></div>
+            
+            <div id="main" class="grid_12 body tab">

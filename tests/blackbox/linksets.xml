@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<test>
+    
+<!--
+  Copyright 2009 Yusuf Simonson
+  This file is part of Snowball.
+  
+  Snowball is free software: you can redistribute it and/or modify it under the
+  terms of the GNU Affero General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
+
+  Snowball is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
+-->
+    
+<!-- First insert sample nodes -->
+
+<testcase>
+<name>PUT a sample node</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT a sample node</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>PUT a sample node</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/x</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- Insert sample links -->
+
+<testcase>
+<name>sample link #1</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/a/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>1.0</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>sample link #2</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/b/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>1.0</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>sample link #3</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/a/x</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>0.5</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>sample link #4</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/b/x</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>0.5</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>sample link #5</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/x/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>0.7</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>sample link #6</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/x/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <weight>0.7</weight>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- GET linksets -->
+
+<testcase>
+<name>GET linkset with non-existent from node</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/doesntexist</requestURL>
+<headers />
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET linkset without direction</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<expectedOutput type="python">
+assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET linkset with illegal direction</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<inputbody type="post">
+    <direction>foo</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET linkset from</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert 'b' in json
+b = json['b']
+assert b['weight'] == 1.0
+assert b['update_date']
+assert len(b['tags']) == 0
+
+assert 'x' in json
+x = json['x']
+assert x['weight'] == 0.5
+assert x['update_date']
+assert len(x['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>GET linkset to</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/x</requestURL>
+<headers />
+<inputbody type="post">
+    <direction>to</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert 'a' in json
+a = json['a']
+assert a['weight'] == 0.5
+assert a['update_date']
+assert len(a['tags']) == 0
+
+assert 'b' in json
+b = json['b']
+assert b['weight'] == 0.5
+assert b['update_date']
+assert len(b['tags']) == 0
+</expectedOutput>
+</testcase>
+
+<!-- illegal DELETE linksets -->
+
+<testcase>
+<name>DELETE linkset without direction</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE linkset with illegal direction</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>foo</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>illegal DELETE from linkset</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/x</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE linkset on non-existent node</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/doesntexist</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<!-- legal DELETE linksets -->
+
+<testcase>
+<name>DELETE to linkset (step 1)</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>to</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE to linkset (step 2)</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/b/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE to linkset (step 3)</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/x/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE from linkset (step 1)</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/links/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>DELETE from linkset (step 2)</name>
+<requestMethod>GET</requestMethod>
+<requestURL>http://localhost:8080/links/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <direction>from</direction>
+</inputbody>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+
+import simplejson
+json = simplejson.loads(contents)
+
+assert len(json) == 0
+</expectedOutput>
+</testcase>
+
+<!-- Cleanup -->
+
+<testcase>
+<name>Cleanup #1</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/a</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Cleanup #2</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/b</requestURL>
+<headers />
+<authentication>
+    <username>blackbox1</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Cleanup #3</name>
+<requestMethod>DELETE</requestMethod>
+<requestURL>http://localhost:8080/nodes/x</requestURL>
+<headers />
+<authentication>
+    <username>blackbox2</username>
+    <password>sandbox</password>
+</authentication>
+<expectedOutput type="python">
+assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
+</expectedOutput>
+</testcase>
+    
+</test>

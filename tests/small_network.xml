@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8" ?><test>
+
+<testcase>
+<name>Create node #0</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/a</requestURL>
+<headers />
+<authentication>
+    <username>ycombinator.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags></tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+print contents
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'ycombinator.com'
+assert json['type'] == 'node'
+assert json['id'] == 'a'
+assert len(json['tags']) == 0
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #1</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/b</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a product b user</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'myspace.com'
+assert json['type'] == 'node'
+assert json['id'] == 'b'
+assert len(json['tags']) == 4
+assert 'a' in json['tags']
+assert 'product' in json['tags']
+assert 'b' in json['tags']
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #2</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/c</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>c user</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'myspace.com'
+assert json['type'] == 'node'
+assert json['id'] == 'c'
+assert len(json['tags']) == 2
+assert 'c' in json['tags']
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #3</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/d</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>b</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'myspace.com'
+assert json['type'] == 'node'
+assert json['id'] == 'd'
+assert len(json['tags']) == 1
+assert 'b' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #4</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/e</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags></tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'myspace.com'
+assert json['type'] == 'node'
+assert json['id'] == 'e'
+assert len(json['tags']) == 0
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #5</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/f</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags></tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'reddit.com'
+assert json['type'] == 'node'
+assert json['id'] == 'f'
+assert len(json['tags']) == 0
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #6</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/g</requestURL>
+<headers />
+<authentication>
+    <username>dropbox.net</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>c b user</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'dropbox.net'
+assert json['type'] == 'node'
+assert json['id'] == 'g'
+assert len(json['tags']) == 3
+assert 'c' in json['tags']
+assert 'b' in json['tags']
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #7</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/h</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>c</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'reddit.com'
+assert json['type'] == 'node'
+assert json['id'] == 'h'
+assert len(json['tags']) == 1
+assert 'c' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #8</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/i</requestURL>
+<headers />
+<authentication>
+    <username>microsoft.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>product</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'microsoft.com'
+assert json['type'] == 'node'
+assert json['id'] == 'i'
+assert len(json['tags']) == 1
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create node #9</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/nodes/j</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>product</tags>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['links'] == {}
+assert json['creation_date']
+assert json['owner'] == 'reddit.com'
+assert json['type'] == 'node'
+assert json['id'] == 'j'
+assert len(json['tags']) == 1
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #1</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/e/b</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a product b user</tags>
+    <weight>0.405973334804</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.405973334804
+assert len(json['tags']) == 4
+assert 'a' in json['tags']
+assert 'product' in json['tags']
+assert 'b' in json['tags']
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #2</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/f/b</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a c b product</tags>
+    <weight>0.768627450052</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.768627450052
+assert len(json['tags']) == 4
+assert 'a' in json['tags']
+assert 'c' in json['tags']
+assert 'b' in json['tags']
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #3</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/a/b</requestURL>
+<headers />
+<authentication>
+    <username>ycombinator.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a b</tags>
+    <weight>-0.836935757772</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.836935757772
+assert len(json['tags']) == 2
+assert 'a' in json['tags']
+assert 'b' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #4</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/j/e</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>user</tags>
+    <weight>-0.798325352875</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.798325352875
+assert len(json['tags']) == 1
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #5</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/h/e</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a product b</tags>
+    <weight>0.548124090549</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.548124090549
+assert len(json['tags']) == 3
+assert 'a' in json['tags']
+assert 'product' in json['tags']
+assert 'b' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #6</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/f/e</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a product</tags>
+    <weight>0.825399059851</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.825399059851
+assert len(json['tags']) == 2
+assert 'a' in json['tags']
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #7</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/i/e</requestURL>
+<headers />
+<authentication>
+    <username>microsoft.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>product</tags>
+    <weight>-0.867092330174</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.867092330174
+assert len(json['tags']) == 1
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #8</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/d/e</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>c</tags>
+    <weight>0.44381174232</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.44381174232
+assert len(json['tags']) == 1
+assert 'c' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #9</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/b/e</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>product</tags>
+    <weight>-0.562637904239</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.562637904239
+assert len(json['tags']) == 1
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #10</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/g/e</requestURL>
+<headers />
+<authentication>
+    <username>dropbox.net</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a c product</tags>
+    <weight>0.672019294565</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.672019294565
+assert len(json['tags']) == 3
+assert 'a' in json['tags']
+assert 'c' in json['tags']
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #11</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/c/e</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags></tags>
+    <weight>0.224022794003</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.224022794003
+assert len(json['tags']) == 0
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #12</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/j/g</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>c</tags>
+    <weight>0.444828930432</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.444828930432
+assert len(json['tags']) == 1
+assert 'c' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #13</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/h/g</requestURL>
+<headers />
+<authentication>
+    <username>reddit.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a</tags>
+    <weight>0.0338153940483</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == 0.0338153940483
+assert len(json['tags']) == 1
+assert 'a' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #14</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/d/g</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a c b product</tags>
+    <weight>-0.407504119949</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.407504119949
+assert len(json['tags']) == 4
+assert 'a' in json['tags']
+assert 'c' in json['tags']
+assert 'b' in json['tags']
+assert 'product' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #15</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/d/j</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>a c b</tags>
+    <weight>-0.663412196264</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.663412196264
+assert len(json['tags']) == 3
+assert 'a' in json['tags']
+assert 'c' in json['tags']
+assert 'b' in json['tags']
+
+</expectedOutput>
+</testcase>
+
+<testcase>
+<name>Create link #16</name>
+<requestMethod>PUT</requestMethod>
+<requestURL>http://localhost:8080/links/b/j</requestURL>
+<headers />
+<authentication>
+    <username>myspace.com</username>
+    <password>sandbox</password>
+</authentication>
+<inputbody type="post">
+    <tags>user</tags>
+    <weight>-0.169098113498</weight>
+</inputbody>
+<expectedOutput type="python">
+
+assert response.code == 200, 'expected response code 200 but got ' + str(response.code)
+    
+import simplejson
+json = simplejson.loads(contents)
+
+assert json['update_date']
+assert json['weight'] == -0.169098113498
+assert len(json['tags']) == 1
+assert 'user' in json['tags']
+
+</expectedOutput>
+</testcase>
+</test>
