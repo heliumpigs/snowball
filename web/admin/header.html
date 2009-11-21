@@ -32,7 +32,7 @@
         <script type="text/javascript" src="{{ static_url('script/jquery.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/jquery-ui.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/json.js') }}"></script>
-        <script type="text/javascript" src="{{ static_url('script/client.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/ui.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/' + page + '.js') }}"></script>
     </head>
     <body>
@@ -40,7 +40,7 @@
         
         <div class="container_12">
             <div id="header" class="grid_4">
-                snowball &raquo; {{ page }}
+                <span class="bold">snowball &raquo;</span> {{ page }}
             </div>
             <div id="tabs" class="grid_8">
                 <ul>
