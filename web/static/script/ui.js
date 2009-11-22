@@ -16,16 +16,21 @@
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-curTab = null;
+var timeoutId = null;
 
-function tab(id) {
-    $('#' + curTab).fadeOut(100, function() {
-        $('#' + id).fadeIn(100);
-    });
-    
-    curTab = id;
-    breadcrumbs(curTab);
-    window.location.hash = '#' + curTab;
+function showPanel(name, message) {
+    if(timeoutId) clearTimeout(timeoutId);
+    $('#' + name + 'Message').text(message);
+    $('#' + name + 'Panel').fadeIn();
+    timeoutId = setTimeout("$('#" + name + "Panel').fadeOut(); timeoutId = null;", 4000);
+}
+
+function showInfo(message) {
+    showPanel('info', message);
+}
+
+function showError(message) {
+    showPanel('error', message);
 }
 
 function breadcrumbs() {
@@ -48,7 +53,7 @@ function dialog(title, contents, ok, cancel) {
     };
     
     if(cancel) {
-        button['cancel'] = function() {
+        buttons['cancel'] = function() {
             $(this).dialog('close');
             $('#dialog').remove();
         }
@@ -82,7 +87,7 @@ function failDialog(res, status, errorThrown) {
         var message = 'unknown';
     }
 
-    dialog('error', 'request failed<br />reason: ' + message);
+    dialog('error', '<p>request failed<br />reason: ' + message + '</p><p>response:<br />' + res.responseText + '</p>');
 }
 
 function authDialog(username, callback) {
@@ -111,7 +116,7 @@ function mapTable(map, updateFunc, deleteFunc) {
         if(map[i + 2] == true) {
             table += "<td><input id='" + map[i] + "Value' type='text' value='" + map[i + 1] + "' /></td>";
         } else {
-            table += "<td>" + map[i + 1] + "</td>";
+            table += "<td id='" + map[i] + "Value'>" + map[i + 1] + "</td>";
         }
         
         table += "</tr>";
@@ -120,11 +125,11 @@ function mapTable(map, updateFunc, deleteFunc) {
     table += "</table>";
     
     if(updateFunc) {
-        table += "<input type='button' value='update' class='button' onclick='" + updateFunc + "()' />"
+        table += "<input type='button' value='update' class='button' onclick='" + updateFunc + "' />"
     }
     
     if(deleteFunc) {
-        table += "<input type='button' value='delete' class='button' onclick='" + deleteFunc + "()' />"
+        table += "<input type='button' value='delete' class='button' onclick='" + deleteFunc + "' />"
     }
     
     return table;

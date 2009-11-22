@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
 <!--
   Copyright 2009 Yusuf Simonson
   This file is part of Snowball.
@@ -19,7 +16,7 @@
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
     <head>
         <title>snowball | {{ page }}</title>
         
@@ -33,14 +30,16 @@
         <script type="text/javascript" src="{{ static_url('script/jquery-ui.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/json.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/ui.js') }}"></script>
-        <script type="text/javascript" src="{{ static_url('script/' + page + '.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/admin/' + page + '.js') }}"></script>
     </head>
     <body>
         <div id="dialog" title="dialog"></div>
         
         <div class="container_12">
             <div id="header" class="grid_4">
-                <span class="bold">snowball &raquo;</span> {{ page }}
+                <a href="/admin" class="bold">snowball</a>
+                &raquo; <a href="/admin/{{ page }}">{{ page }}
+                <a id="subheader"></a>
             </div>
             <div id="tabs" class="grid_8">
                 <ul>
@@ -53,3 +52,19 @@
             <div class="clear"></div>
             
             <div id="main" class="grid_12 body tab">
+                <div id="infoPanel" class="ui-widget" style="display: none;">
+                    <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+                        <p>
+                            <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                            <span id="infoMessage"></span>
+                        </p>
+                    </div>
+                </div>
+                <div id="errorPanel" class="ui-widget" style="display: none;">
+                    <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                        <p>
+                            <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+                            <span id="errorMessage"></span>
+                        </p>
+                    </div>
+                </div>

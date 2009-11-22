@@ -85,6 +85,18 @@ th {
     border: 0;
 }
 
+#errorPanel, #infoPanel {
+    margin-bottom: 1em;
+}
+
+#errorPanel p, #infoPanel p {
+    margin: 0;
+}
+
+#errorPanel span {
+    color: white;
+}
+
 #copy {
     padding-top: 1em;
     font-family: Verdana;

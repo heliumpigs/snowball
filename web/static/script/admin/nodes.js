@@ -16,11 +16,17 @@
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+function nodeValue() {
+    return $('#nodeURI').attr('value');
+}
+
 function getNodeURL() {
-    return '/nodes/' + encodeURIComponent($('#nodeURI').attr('value'));
+    return '/nodes/' + encodeURIComponent(nodeValue());
 }
 
 function getNode() {
+    if(nodeValue() == '') return showError('please specify a node');
+    
     var success = function(json) {
         var linkHtml = "";
         var links = json['links'];
@@ -46,7 +52,7 @@ function getNode() {
             'links', linkHtml, false
         ];
         
-        $("#nodeResults").html(mapTable(map)).show();
+        $("#nodeResults").html(mapTable(map, 'updateNode()', 'deleteNode()')).show();
     };
 
     $.ajax({
@@ -60,28 +66,47 @@ function getNode() {
     });
 }
 
-/*function updateNode() {
-    var ok = function(dlg) {
-        authDialog()
-    };
-    
-    dialog('are you sure?', 'update the node will delete the links and alter the update date. continue?', ok, true);
-}
-
-function deleteNode() {
-    var success = function() {
+function updateNode() {
+    var onAuth = function(dlg) {
+        var success = function() {
+            showInfo('node successfully updated');
+        };
         
-    };
-    
-    var ok = function(dlg) {
         $.ajax({
-            type: 'DELETE',
+            type: 'PUT',
             url: getNodeURL(),
             dataType: 'json',
             data: 'format=json',
+            username: $('#loginUsername').attr('value'),
+            password: $('#loginPassword').attr('value'),
             
             success: success,
             error: failDialog
         });
-    }
-}*/
+    };
+    
+    
+    authDialog($('#ownerValue').text(), onAuth);
+}
+
+function deleteNode() {
+    var onAuth = function(dlg) {
+        var success = function() {
+            showInfo('node successfully deleted');
+            $('#nodeResults').empty();
+        };
+        
+        $.ajax({
+            type: 'DELETE',
+            url: getNodeURL(),
+            username: $('#loginUsername').attr('value'),
+            password: $('#loginPassword').attr('value'),
+            
+            success: success,
+            error: failDialog
+        });
+    };
+    
+    
+    authDialog($('#ownerValue').text(), onAuth);
+}
