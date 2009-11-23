@@ -18,6 +18,7 @@ from web import *
 from web import util
 from web.serialization import *
 from oz.handler import *
+import model
 
 REALM = 'Administrator Control Panel'
 
@@ -38,3 +39,28 @@ class AdminHandler(util.SnowballHandler):
             self.render('recommendations.html', page='recommendations')
         elif path == '/accounts':
             self.render('accounts.html', page='accounts')
+        else:
+            raise web.HTTPError(404, 'not found')
+            
+    @basic_auth(REALM, admin_auth)
+    def put(self, path):
+        if path.startswith('/controller/accounts/'):
+            name = path[21:]
+            password = self.get_argument('password')
+            
+            if not model.create_account(self.db, name, password):
+                raise web.HTTPError(409, 'account already exists')
+            
+        else:
+            raise web.HTTPError(404, 'not found')
+            
+    @basic_auth(REALM, admin_auth)
+    def delete(self, path):
+        if path.startswith('/controller/accounts/'):
+            name = path[21:]
+            
+            if not model.delete_account(self.db, name):
+                raise web.HTTPError(404, 'could not find account')
+                
+        else:
+            raise web.HTTPError(404, 'not found')

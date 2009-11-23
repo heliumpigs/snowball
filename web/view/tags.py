@@ -14,12 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import uuid
-import datetime
-
 from tornado import web
 from oz.handler import *
-import model
+import model, scarecrow, uuid, datetime
 
 from web import *
 from web import util
@@ -30,37 +27,37 @@ class TagHandler(util.SnowballHandler):
     
     @util.error_handler
     def get(self, uri):
-        hash = model.node_key(uri)
+        hash = scarecrow.ident(model.node_key(uri))
         node = request.db[hash]
         
-        node = self.db[hash]
-        if node == None: raise web.HTTPError(404)       
+        try:
+            node = self.db[hash]
+        except KeyError:
+            raise web.HTTPError(404)       
         
         serialize(self, node.tags)
     
     @basic_auth(util.REALM, util.auth)
     @util.error_handler
     def put(self, uri):
-        hash = model.node_key(uri)        
-        new_tags = util.check_tags(self.get_argument('tags', None))
+        hash = scarecrow.ident(model.node_key(uri))
         
-        if new_tags == None:
-            raise web.HTTPError(400)
+        tags = util.check_tags(self.get_argument('tags', None))
+        if not tags:
+            raise web.HTTPError(400, "requires 'tags' parameter")
         
-        node = self.db[hash]
-        
-        if node == None:
+        try:
+            node = self.db[hash]
+        except KeyError:
             #return a not found if the node doesn't exist
             raise web.HTTPError(404)
-        elif node['owner'] != self.current_user:
+            
+        if node.owner != self.current_user:
             #return a forbidden if the current user doesn't own the node
             raise web.HTTPError(403)
         
-        tags = node.tags
-        for new_tag in new_tags:
-            tags.add(new_tag)
-        
-        node.tags = tags
+        for tag in tags:
+            node.tags.add(tag)
         
         self.db[hash] = node
         serialize(self, tags)
@@ -68,15 +65,16 @@ class TagHandler(util.SnowballHandler):
     @basic_auth(util.REALM, util.auth)
     @util.error_handler
     def delete(self, uri):
-        hash = model.node_key(uri)
+        hash = scarecrow.ident(model.node_key(uri))
         delete_tags = util.check_tags(self.get_argument('tags', None))
         
-        node = self.db[hash]
-        
-        if node == None:
+        try:
+            node = self.db[hash]
+        except KeyError:
             #return a not found if the node doesn't exist
             raise web.HTTPError(404)
-        elif node['owner'] != self.current_user:
+        
+        if node['owner'] != self.current_user:
             #return a forbidden if the current user doesn't own the node
             raise web.HTTPError(403)
         

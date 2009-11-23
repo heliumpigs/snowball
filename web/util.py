@@ -13,24 +13,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
-from tornado import web
-
-import re, iso8601, ConfigParser, urllib
+import re, iso8601, ConfigParser, urllib, model, scarecrow
 from datetime import datetime
 
-import model
+from tornado import web
 from web.serialization import *
-
 from oz.handler import *
 
 REALM = 'Snowball'
 
 def auth(req, realm, name, password):
     """Authenticates the given credentials"""
-    if realm != REALM: return False
+    if realm != REALM:
+        return False
         
     db = req.application.settings['db']
-    return model.auth_user(db, name, password)
+    return model.auth_account(db, name, password)
 
 def assert_string(name, value, max_length):
     """
@@ -47,7 +45,9 @@ def check_tags(tag_arg):
     tags
     """
     
-    if tag_arg == None: return None
+    if tag_arg == None:
+        return None
+    
     tags = tag_arg.split()
     
     for tag in tags:
@@ -65,7 +65,8 @@ def check_datetime(datetime_arg):
     object
     """
     
-    if datetime_arg == None: return None
+    if datetime_arg == None:
+        return None
     
     try:
         return iso8601.parse_date(datetime_arg)
@@ -79,7 +80,8 @@ def assert_direction(direction):
 def check_weight(weight):
     """Ensures that a given argument is a valid weight, i.e. a float >= -1 and <= 1"""
     try:
-        if weight == None: return weight
+        if weight == None:
+            return weight
         
         try:
             weight = float(weight)
@@ -110,23 +112,23 @@ def get_dynamic_setting(db, name):
     Gets a setting that can be altered dynamically by Snowball (i.e. a non-user
     defined setting)
     """
-    settings = db[model.key('settings')]
-    
-    if settings is None or not name in settings:
+    try:
+        settings = db[model.settings_key()]
+        return settings[name]
+    except KeyError:
         return None
-    else:
-        return settings.name
 
 def save_dynamic_setting(db, name, value):
     """Sets a dynamic setting (i.e. a non-user defined setting)"""
-    settings_key = model.key('settings')
+    settings_ident = scarecrow.ident(model.settings_key())
     
-    settings = db[settings_key]
-    if settings is None: settings = model.Storage()
+    try:
+        settings = db[settings_ident]
+    except KeyError:
+        settings = model.Storage()
     
-    settings.name = value
-    
-    db[settings_key] = settings
+    settings[name] = value
+    db[settings_ident] = settings
     
 class SnowballHandler(OzHandler):
     """"

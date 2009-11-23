@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import model, pickle
+import model, pickle, scarecrow
 from scarecrow import mysql
     
 class MysqlLinksIndex(object):
@@ -33,15 +33,18 @@ class MysqlLinksIndex(object):
     def map(self, db, obj_id, obj):
         if 'links' in obj and 'type' in obj and obj['type'] == 'node':
             for link_uri in obj.links:
-                link_hash = model.node_key(link_uri)
+                link_hash = scarecrow.ident(model.node_key(link_uri))
                 link_obj = self.model[link_hash]
                 
                 if link_obj == None: continue
-                link_owner = model.account_key(link_obj.owner)
+                link_owner = scarecrow.ident(model.account_key(link_obj.owner))
                 
                 db.execute("INSERT INTO " + self.name + " VALUES (%s, %s, %s)", obj_id, link_hash, link_owner)
                 
     def get(self, db, to_link, owner=None):
+        to_link = scarecrow.ident(to_link)
+        if owner: owner = scarecrow.ident(owner)
+        
         query = "SELECT body FROM entities JOIN %s ON entities.id=%s.entity_id WHERE to_link=%s" % (self.name, self.name, '%s')
         
         if owner:
@@ -50,12 +53,16 @@ class MysqlLinksIndex(object):
         else:
             results = db.query(query, to_link)
         
-        if results == None: return
+        if results == None:
+            return
         
         for row in results:
             yield pickle.loads(row.body)
                 
     def get_ids(self, db, to_link, owner=None):
+        to_link = scarecrow.ident(to_link)
+        if owner: owner = scarecrow.ident(owner)
+        
         query = "SELECT entity_id FROM entities JOIN %s ON entities.id=%s.entity_id WHERE to_link=%s" % (self.name, self.name, '%s')
         
         if owner:
@@ -64,17 +71,21 @@ class MysqlLinksIndex(object):
         else:
             results = db.query(query, to_link)
         
-        if results == None: return
+        if results == None:
+            return
         
         for row in results:
-            yield row.entity_id
+            yield scarecrow.ScarecrowIdent(row.entity_id)
         
     def random(self, db, seed='', count=1):
-        if seed != '': int(seed)
-        int(count)
+        if seed != '':
+            assert isinstance(seed, int)
+            
+        assert isinstance(count, int)
         
         results = db.query("SELECT entity_id, to_link FROM %s ORDER BY RAND(%s) LIMIT %s" % (self.name, seed, count))
-        for row in results: yield row.entity_id, row.to_link
+        for row in results:
+            yield scarecrow.ScarecrowIdent(row.entity_id), scarerow.ScarecrowIdent(row.to_link)
 
 def db(host, dbname, user, password):
     links_index = MysqlLinksIndex('links_index')

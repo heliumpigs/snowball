@@ -19,7 +19,7 @@ from datetime import datetime
 
 from tornado import web
 from oz.handler import *
-import model
+import model, scarecrow
 
 from web import *
 from web import util
@@ -30,41 +30,54 @@ class LinkHandler(util.SnowballHandler):
     
     @util.error_handler
     def get(self, from_node, to_node):
-        #Return a not found if the node doesn't exist
-        node = self.db[model.node_key(from_node)]
-        if not node: raise web.HTTPError(404, 'could not find node')
+        try:
+            node = self.db[model.node_key(from_node)]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
-        #Return a not found if the link doesn't exist
-        link = node.links.get(to_node, None)
-        if not link: raise web.HTTPError(404, 'could not find link')
+        try:
+            link = node.links[to_node]
+        except KeyError:
+            #Return a not found if the link doesn't exist
+            raise web.HTTPError(404, 'could not find link')
         
         serialize(self, link)
     
     @basic_auth(util.REALM, util.auth)
     @util.error_handler
     def put(self, from_node, to_node):
-        from_hash = model.node_key(from_node)
-        to_hash = model.node_key(to_node)
+        from_hash = scarecrow.ident(model.node_key(from_node))
+        to_hash = scarecrow.ident(model.node_key(to_node))
         
         weight = util.check_weight(self.get_argument('weight', None))
         tags = util.check_tags(self.get_argument('tags', None))
         
-        node = self.db[from_hash]
-        
-        #Return a not found if the node doesn't exist
-        if not node or not self.db[to_hash]: raise web.HTTPError(404, 'could not find to node')
+        try:
+            node = self.db[from_hash]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find from node')
+            
+        if not to_hash in db:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find to node')
         
         #Return a forbidden if the current user doesn't own the node
-        if node.owner != self.current_user: raise web.HTTPError(403, 'you do not own the from node')
+        if node.owner != self.current_user:
+            raise web.HTTPError(403, 'you do not own the from node')
         
         if to_node in node.links:
             #Update the link if it already exists
             link = node.links[to_node]
-            if weight != None: link.weight = weight
-            if tags: link.tags = tags
+            if weight != None:
+                link.weight = weight
+            if tags:
+                link.tags = tags
         else:
             #Require the weight parameter if the link doesn't exist yet
-            if weight == None: raise web.HTTPError(400, "requires 'weight' parameter")
+            if weight == None:
+                raise web.HTTPError(400, "requires 'weight' parameter")
             
             #Create a new link if it doesn't exist yet
             link = model.Storage()
@@ -80,14 +93,17 @@ class LinkHandler(util.SnowballHandler):
     @basic_auth(util.REALM, util.auth)
     @util.error_handler
     def delete(self, from_node, to_node):
-        from_hash = model.node_key(from_node)
-        node = self.db[from_hash]
+        from_hash = scarecrow.ident(model.node_key(from_node))
         
-        #Return a not found if the node doesn't exist
-        if not node: raise web.HTTPError(404, 'could not find node')
+        try:
+            node = self.db[from_hash]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
         #Return a forbidden if the current user doesn't own the node
-        if node.owner != self.current_user: raise web.HTTPError(403, 'you do not own the from node')
+        if node.owner != self.current_user:
+            raise web.HTTPError(403, 'you do not own the from node')
         
         if to_node in node.links:
             del node.links[to_node]
@@ -100,16 +116,17 @@ class LinkHandler(util.SnowballHandler):
 class LinkSetHandler(util.SnowballHandler):
     @util.error_handler
     def get_from(self, uri):
-        node = self.db[model.node_key(uri)]
-        
-        #Return a not found if the node doesn't exist
-        if not node: raise web.HTTPError(404, 'could not find node')
+        try:
+            node = self.db[model.node_key(uri)]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
         serialize(self, node.links)
     
     @util.error_handler
     def get_to(self, uri):
-        hash = model.node_key(uri)
+        hash = scarecrow.ident(model.node_key(uri))
         
         nodes = self.db.index('links_index', 'get', hash)
         links = {}
@@ -117,14 +134,16 @@ class LinkSetHandler(util.SnowballHandler):
         #Iterate through all the linked nodes and ensure the link still exists
         #since the index could be stale
         for node in nodes:
-            link = node.links.get(uri, None)
-            if link: links[node.id] = link
+            try:
+                link = node.links[uri]
+                links[node.id] = link
+            except:
+                pass
         
         #If there were no results, check to see that the node exists; if not,
         #return a not found
-        if len(links) == 0:
-            node = self.db[hash]
-            if not node: raise web.HTTPError(404, 'could not find node')
+        if len(links) == 0 and not hash in self.db:
+            raise web.HTTPError(404, 'could not find node')
                 
         serialize(self, links)
         
@@ -140,28 +159,32 @@ class LinkSetHandler(util.SnowballHandler):
         
     @util.error_handler
     def delete_from(self, uri):
-        hash = model.node_key(uri)
-        node = self.db[hash]
+        hash = scarecrow.ident(model.node_key(uri))
         
-        #Return a not found if the node doesn't exist
-        if not node: raise web.HTTPError(404, 'could not find node')
+        try:
+            node = self.db[hash]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
         #Return a forbidden if the current user doesn't own the node
-        if node.owner != self.current_user: raise web.HTTPError(403, 'you do not own the node')
+        if node.owner != self.current_user:
+            raise web.HTTPError(403, 'you do not own the node')
         
         node.links = {}
         self.db[hash] = node
     
     @util.error_handler
     def delete_to(self, uri):
-        hash = model.node_key(uri)
+        hash = scarecrow.ident(model.node_key(uri))
         results = False
-        owner_id = model.account_key(self.current_user)
         
-        #iterate through all the linked nodes and delete the link if it still
+        #Iterate through all the linked nodes and delete the link if it still
         #exists
-        for node in self.db.index('links_index', 'get', hash, owner_id):
-            if not uri in node.links: continue
+        for node in self.db.index('links_index', 'get', hash, model.account_key(self.current_user)):
+            if not uri in node.links:
+                continue
+            
             results = True
             
             del node.links[uri]
@@ -169,9 +192,8 @@ class LinkSetHandler(util.SnowballHandler):
                
         #If no changes were made, the node might not exist; throw a not found
         #if it doesn't
-        if not results:
-            node = self.db[hash]
-            if not node: raise web.HTTPError(404, 'could not find node')
+        if not results and not node in self.db:
+            raise web.HTTPError(404, 'could not find node')
     
     @basic_auth(util.REALM, util.auth)
     @util.error_handler

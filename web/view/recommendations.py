@@ -30,14 +30,19 @@ class RecommendationHandler(util.SnowballHandler):
     def get(self, from_uri, to_uri):
         node_store = cache.NodeStore(self.db, 4)
         
-        from_node = node_store[model.node_key(from_uri)]
-        if not from_node: raise web.HTTPError(404, 'could not find from node')
+        try:
+            from_node = node_store[model.node_key(from_uri)]
+        except KeyError:
+            raise web.HTTPError(404, 'could not find from node')
         
-        to_node = node_store[model.node_key(to_uri)]
-        if not to_node: raise web.HTTPError(404, 'could not find to node')
+        try:
+            to_node = node_store[model.node_key(to_uri)]
+        except KeyError:
+            raise web.HTTPError(404, 'could not find to node')
         
         rec = engine.recommendation(node_store, from_node, to_node, self.application.settings)
-        if not rec: rec = 0.0
+        if not rec:
+            rec = 0.0
         
         serialize(self, rec)
         
@@ -46,13 +51,15 @@ class RecommendationSetHandler(util.SnowballHandler):
     
     @util.error_handler
     def get(self, uri):
-        max_visit = int(self.application.settings['recommendations']['max_visit'])
+        max_visit = self.application.settings['recommendations']['max_visit']
         
         tags = util.check_tags(self.get_argument('tags', ''))
         node_store = cache.NodeStore(self.db, max_visit + 1)
         
-        from_node = node_store[model.node_key(uri)]
-        if not from_node: raise web.HTTPError(404, 'could not find node')
+        try:
+            from_node = node_store[model.node_key(uri)]
+        except KeyError:
+            raise web.HTTPError(404, 'could not find node')
         
         recs = engine.recommendations(node_store, from_node, tags, self.application.settings)
         serialize(self, recs)

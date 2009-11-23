@@ -70,6 +70,6 @@ def add_test_users(db):
     """Adds the users that are used in the test cases to the database"""
         
     for account in SAMPLE_DATA_ACCOUNTS:
-        model.create_user(db, account, 'sandbox')
+        model.create_account(db, account, 'sandbox')
 
 if __name__ == '__main__': main()

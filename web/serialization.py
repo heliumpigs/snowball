@@ -78,11 +78,13 @@ def _flatten(obj):
         
         for key in dir(obj):
             #Ignore 'private' attributes that start with an underscore
-            if key.startswith('_'): continue
+            if key.startswith('_'):
+                continue
             
             #Do not add functions to the filtered dict
             value = getattr(obj, key)
-            if type(value) is types.FunctionType: continue
+            if type(value) is types.FunctionType:
+                continue
             
             new_obj[key] = _flatten(value)
             
@@ -97,11 +99,13 @@ def serialize(request, obj, finish=True):
     
     #Get the format if it was explicitly specified by the client
     format = request.get_argument('format', None)
-    if format == None: format = default_format
+    if format == None:
+        format = default_format
     
     #Get the serializer method for the format
     serializer = SERIALIZERS.get(format, None)
-    if serializer == None: serializer = SERIALIZERS[default_format]
+    if serializer == None:
+        serializer = SERIALIZERS[default_format]
     
     #If it's an error, change the object to fit a standard error message schema
     if isinstance(obj, web.HTTPError):
@@ -134,8 +138,10 @@ def _to_xml_item(root, obj):
     
     if isinstance(obj, objdict):
         #Type and id attributes are special; handle them as such
-        if 'type' in obj: root.tag = obj['type']
-        if 'id' in obj: root.set('id', obj['id'])
+        if 'type' in obj:
+            root.tag = obj['type']
+        if 'id' in obj:
+            root.set('id', obj['id'])
         
         for key in obj:
             if key != 'id' and key != 'type':

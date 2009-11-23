@@ -58,7 +58,8 @@ def similarity(node_store, first, second):
     numerator = (mul_sum - first_sum * second_sum / len(links))
     divisor = sqrt(first_divisor * second_divisor)
     
-    if divisor == 0.0: return 0.0
+    if divisor == 0.0:
+        return 0.0
     return numerator / divisor
 
 def bridging(node_store, node):
@@ -108,9 +109,9 @@ def recommendation(node_store, from_node, to_node, settings):
 
 def recommendations(node_store, node, tags, settings):
     """Gets the recommendations for a given node"""
-    max_nodes = int(settings['recommendations']['max_nodes'])
-    max_visit = int(settings['recommendations']['max_visit'])
-    min_threshold = float(settings['recommendations']['min_threshold'])
+    max_nodes = settings['recommendations']['max_nodes']
+    max_visit = settings['recommendations']['max_visit']
+    min_threshold = settings['recommendations']['min_threshold']
     
     recommended = []
     
@@ -119,7 +120,8 @@ def recommendations(node_store, node, tags, settings):
         to_node = node_store[model.node_key(candidate_uri)]
         
         #Skip the candidate if it doesn't have any of the requested tags
-        if not has_any_tag(to_node, tags): continue
+        if not has_any_tag(to_node, tags):
+            continue
         
         #Get the recommendation score between the two nodes and add it to the
         #list if it is high enough
@@ -155,7 +157,7 @@ def candidates(node_store, root, max_visit):
     for a given node. It is a list of sub-lists, where each sub-list contains
     the uri and resized weight.
     """
-    owner = model.account_key(root.owner)
+    owner = scarecrow.ident(model.account_key(root.owner))
     candidates = {}
     
     #Store a list of already visited links so we don't revisit them

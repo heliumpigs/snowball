@@ -14,10 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, os
-
-import sys
-sys.path.append('../../lib/Scarecrow')
+import hashlib, os, scarecrow
 
 SALT = '4815162342>'
 
@@ -65,28 +62,44 @@ class Entity(Storage):
         self.id = id
         self.type = type
 
-def create_user(db, name, password):
+def create_account(db, name, password):
+    """Creates a new account with the given name and password"""
+    
+    ident = scarecrow.ident(account_key(name))
+    if ident in db: return False
+    
     account = Entity(name, 'account')
     account.password_hash = account_pass(password)
-    db[account_key(name)] = account
+    db[ident] = account
+    return True
     
-def auth_user(db, name, password):
-    account = db[account_key(name)]
+def delete_account(db, name):
+    """Deletes a given account"""
     
-    if not account: return False
-    return account['password_hash'] == account_pass(password)
+    try:
+        del db[name]
+        return True
+    except KeyError:
+        return False
     
-def key(value):
-    return hashlib.md5(value).digest()
+def auth_account(db, name, password):
+    try:
+        db[account_key(name)]
+        return account['password_hash'] == account_pass(password)
+    except KeyError:
+        return False
     
-def node_key(uri):
-    return key('node:' + uri)
+def node_key(name):
+    return 'node:' + name
     
-def rec_key(uri):
-    return key('rec:' + uri)
+def rec_key(name):
+    return 'rec:' + name
 
 def account_key(name):
-    return key('account:' + name)
+    return 'account:' + name
+
+def settings_key():
+    return 'settings'
     
 def account_pass(pw):
-    return key(SALT + pw)
+    return hashlib.md5(SALT + pw).digest()

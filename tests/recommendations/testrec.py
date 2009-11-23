@@ -45,7 +45,9 @@ def main():
         from_node = db[from_hash]
         to_node = db[to_hash]
         
-        if not to_node.id in from_node.links: continue
+        if not to_node.id in from_node.links:
+            continue
+        
         link = from_node.links[to_node.id]
         del from_node.links[to_node.id]
         db[from_hash] = from_node

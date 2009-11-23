@@ -19,7 +19,7 @@ from datetime import datetime
 
 from tornado import web
 from oz.handler import *
-import model
+import model, scarecrow
 
 from web import *
 from web import util
@@ -27,15 +27,25 @@ from web.serialization import *
 
 def put_node(request, uri):
     """Updates an existing or creates a new node identified by the given URI"""
-    hash = model.node_key(uri)
-    node = request.db[hash]
-    
+    hash = scarecrow.ident(model.node_key(uri))
     tags = util.check_tags(request.get_argument('tags', None))
     date = util.check_datetime(request.get_argument('creation_date', None))
     
-    if not node:
-        if not tags: tags = set([])
-        if not date: date = datetime.now()
+    try:
+        node = request.db[hash]
+        
+        #Update an existing node
+        if node.owner != request.current_user:
+            raise web.HTTPError(403, 'you do not own the node')
+        if tags:
+            node.tags = tags
+        if date:
+            node.creation_date = date
+    except KeyError:
+        if not tags:
+            tags = set([])
+        if not date:
+            date = datetime.now()
         
         #Create a new node if it doesn't exist
         node = model.Entity(uri, 'node')
@@ -47,11 +57,6 @@ def put_node(request, uri):
         node._cache = model.Storage()
         node._cache.candidates = model.Storage()
         node._cache.expired = False
-    else:
-        #Update an existing node
-        if node.owner != request.current_user: raise web.HTTPError(403, 'you do not own the node')
-        if tags: node.tags = tags
-        if date: node.creation_date = date
     
     node.update_date = datetime.now()
     request.db[hash] = node
@@ -62,10 +67,11 @@ class NodeHandler(util.SnowballHandler):
     
     @util.error_handler
     def get(self, uri):
-        node = self.db[model.node_key(uri)]
-        
-        #Return a not found if the node doesn't exist
-        if not node: raise web.HTTPError(404, 'could not find node')
+        try:
+            node = self.db[model.node_key(uri)]
+        except KeyError:
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
         serialize(self, node)
     
@@ -77,18 +83,23 @@ class NodeHandler(util.SnowballHandler):
     @basic_auth(util.REALM, util.auth)
     @util.error_handler
     def delete(self, uri):
-        hash = model.node_key(uri)
-        node = self.db[hash]
-                
-        #Return a not found if the node doesn't exist
-        if not node: raise web.HTTPError(404, 'could not find node')
+        hash = scarecrow.ident(model.node_key(uri))
+        
+        try:
+            node = self.db[hash]
+        except KeyError:    
+            #Return a not found if the node doesn't exist
+            raise web.HTTPError(404, 'could not find node')
         
         #Return a forbidden if the current user doesn't own the node
-        if node.owner != self.current_user: raise web.HTTPError(403, 'you do not own the node')
+        if node.owner != self.current_user:
+            raise web.HTTPError(403, 'you do not own the node')
         
         #Iterate through each linked node and delete the link
         for link_node in self.db.index('links_index', 'get', hash):
-            if uri in link_node.links: del link_node.links[uri]
+            if uri in link_node.links:
+                del link_node.links[uri]
+            
             self.db[model.node_key(link_node.id)] = link_node
             
         del self.db[hash]

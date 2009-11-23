@@ -26,11 +26,15 @@ def main():
     timeout = parser.get('timeout', '5', int)
     db = settings_parser.acquire_model(parser)
     
-    if not server.startswith('http://'): server = 'http://' + server
-    if server.endswith('/'): server = server[:len(server) - 1]
-    if options.timeout > 0: socket.timeout = options.timeout
+    if not server.startswith('http://'):
+        server = 'http://' + server
+    if server.endswith('/'):
+        server = server[:len(server) - 1]
+    if options.timeout > 0:
+        socket.timeout = options.timeout
     
-    successful = failed = 0
+    successful = 0
+    failed = 0
     http = httplib2.Http()
     
     for node in db.index('type_index', 'get', 'node'):

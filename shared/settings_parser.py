@@ -27,7 +27,9 @@ class OptionsParser:
         
         for arg in raw_args[1:]:
             if arg.startswith('-'):
-                if opt is not None: self.opts.append((opt, val))
+                if opt is not None:
+                    self.opts.append((opt, val))
+                
                 opt = arg[1:]
                 val = None
             elif opt is not None and val is None:
@@ -35,7 +37,8 @@ class OptionsParser:
             else:
                 self.args.append(arg)
         
-        if opt is not None: self.opts.append((opt, val))
+        if opt is not None:
+            self.opts.append((opt, val))
     
     def show_usage(self):
         print self.usage

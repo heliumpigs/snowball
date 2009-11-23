@@ -120,7 +120,8 @@ class NodeStore(LRU):
     
     def __getitem__(self, obj):
         #Try to get the item from the cache first
-        if obj in self: return LRU.__getitem__(self, obj)
+        if obj in self:
+            return LRU.__getitem__(self, obj)
         
         #Pull the item from the database otherwise
         value = self.db[obj]
