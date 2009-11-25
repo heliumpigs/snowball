@@ -59,7 +59,7 @@ class LinkHandler(util.SnowballHandler):
             #Return a not found if the node doesn't exist
             raise web.HTTPError(404, 'could not find from node')
             
-        if not to_hash in db:
+        if not to_hash in self.db:
             #Return a not found if the node doesn't exist
             raise web.HTTPError(404, 'could not find to node')
         

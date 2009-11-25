@@ -84,7 +84,7 @@ def delete_account(db, name):
     
 def auth_account(db, name, password):
     try:
-        db[account_key(name)]
+        account = db[account_key(name)]
         return account['password_hash'] == account_pass(password)
     except KeyError:
         return False
