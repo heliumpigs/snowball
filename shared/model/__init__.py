@@ -77,7 +77,7 @@ def delete_account(db, name):
     """Deletes a given account"""
     
     try:
-        del db[name]
+        del db[account_key(name)]
         return True
     except KeyError:
         return False

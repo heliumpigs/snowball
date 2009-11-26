@@ -99,7 +99,11 @@ def error_handler(func):
     """
     def func_replacement(self, *args, **kwargs):
         try:
-            return func(self, *args, **kwargs)
+            result = func(self, *args, **kwargs)
+            
+            if not self._finished:
+                serialize(self, {'type': 'success', 'code': 200})
+            return result
         except AssertionError, e:
             serialize(self, web.HTTPError(400, e.message))
         except web.HTTPError, e:

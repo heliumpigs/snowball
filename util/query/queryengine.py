@@ -18,7 +18,7 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../shared'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
-import optparse, pprint, model, settings_parser
+import optparse, pprint, model, settings_parser, base64
 
 supported_modes = ('add', 'iter', 'query', 'delete')
 
@@ -27,8 +27,12 @@ def main():
     db = settings_parser.acquire_model(parser)
     
     supported_modes_str = ', '.join(supported_modes[:-1]) + ' or ' + supported_modes[-1]
-    if len(args) < 2: parser.error('Mode parameter required (%s)', supported_modes_str)
-    if not args[1] in supported_modes: parser.error('Unknown mode: %s. Must be %s', supported_modes_str)
+    if len(parser.args) < 2:
+        parser.error('Mode parameter required (%s)' % supported_modes_str)
+    if not parser.args[1] in supported_modes:
+        parser.error('Unknown mode: %s. Must be %s' % (parser.args[1], supported_modes_str))
+        
+    mode = parser.args[1]
     
     #Read all of the input code until the user feeds a blank line
     code = ''
@@ -40,7 +44,7 @@ def main():
         else:
             code += line
         
-    if options.mode == 'add':
+    if mode == 'add':
         add(db, code)
     else:
         pp = pprint.PrettyPrinter()
@@ -48,25 +52,22 @@ def main():
         for entity_id in db:
             entity = db[entity_id]
             
-            if options.mode == 'iter':
+            if mode == 'iter':
                 #Just execute the input code for each entity
                 exec code
-            elif options.mode == 'query':
-                #Print the current entity if the input code returns True for this
-                #entity
-                if eval(code): pp.pprint(entity)
-            elif options.mode == 'delete':
+            elif mode == 'query':
+                #Print the current entity if the input code returns True for
+                #this entity
+                if eval(code):
+                    pp.pprint(entity)
+            elif mode == 'delete':
                 #Delete the current entity if the input code returns True
-                import base64
-    
                 if eval(code):
                     print 'Deleting entity ' + base64.b16encode(entity_id)
                     del db[entity_id]
 
 def add(db, code):
     """Adds a new entity to the database"""
-    import base64
-    
     entity_id = None
     entity_key = None
     entity = None
