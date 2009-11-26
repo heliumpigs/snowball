@@ -43,6 +43,7 @@ class AdminHandler(util.SnowballHandler):
             raise web.HTTPError(404, 'not found')
             
     @basic_auth(REALM, admin_auth)
+    @util.error_handler
     def put(self, path):
         if path.startswith('/controller/accounts/'):
             name = path[21:]
@@ -55,11 +56,15 @@ class AdminHandler(util.SnowballHandler):
             raise web.HTTPError(404, 'not found')
             
     @basic_auth(REALM, admin_auth)
+    @util.error_handler
     def delete(self, path):
         if path.startswith('/controller/accounts/'):
             name = path[21:]
+            password = self.get_argument('password')
             
-            if not model.delete_account(self.db, name):
+            if not model.auth_account(self.db, name, password):
+                raise web.HTTPError(403, 'incorrect username / password combination')
+            elif not model.delete_account(self.db, name):
                 raise web.HTTPError(404, 'could not find account')
                 
         else:

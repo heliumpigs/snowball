@@ -120,6 +120,7 @@ a.button {
     color: white;
     background-color: #111111;
     padding: 0.5em 0.75em 0.5em 0.75em;
+    margin: 0;
     font-size: 16px;
     text-decoration: none;
     font-weight: bold;
@@ -145,4 +146,8 @@ a.button:hover {
 .button {
     width: 86px;
     margin-right: 1em;
+}
+
+.mini {
+    width: 40%;
 }
