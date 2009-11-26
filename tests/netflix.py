@@ -28,23 +28,17 @@ MOVIE_TEMPLATE = 'netflix.com/movie/%s'
 CUSTOMER_TEMPLATE = 'netflix.com/customer/%s'
 
 def main():
-    parser = optparse.OptionParser("usage: %prog -o <output dir> <movie descriptor> <input dir>")
-    parser.add_option("-o", "--host", action="store", type="string", dest="host", help="REQ: hostname")
+    parser = optparse.OptionParser("usage: %prog <host> <output dir> <movie descriptor> <input dir>")
     (options, args) = parser.parse_args()
     
-    #check to make sure required arguments have been passed in
-    if options.host == None:
-        parser.error("Hostname parameter required")
-        
-    if len(args) != 3:
-        parser.error("Must specify an output dir, movie descriptor file and an input dir")
-        
-    global host
-    host = options.host
+    if len(args) != 4:
+        parser.error('Missing required arguments')
     
-    output_dir = os.path.join(os.path.dirname(__file__), args[0])
-    movie_descriptor = os.path.join(os.path.dirname(__file__), args[1])
-    input_dir = os.path.join(os.path.dirname(__file__), args[2])
+    global host
+    host = args[0]
+    output_dir = os.path.join(os.path.dirname(__file__), args[1])
+    movie_descriptor = os.path.join(os.path.dirname(__file__), args[2])
+    input_dir = os.path.join(os.path.dirname(__file__), args[3])
     
     movies = {}
     customers = set([])

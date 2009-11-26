@@ -111,7 +111,7 @@ def main():
     
     #check to make sure required arguments have been passed in
     if len(args) != 2:
-        parser.error("Hostname and number of nodes arguments required")
+        parser.error('Missing required arguments')
     
     if options.seed:
         random.seed(options.seed)
