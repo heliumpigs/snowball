@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<test>
-    
 <!--
   Copyright 2009 Yusuf Simonson
   This file is part of Snowball.
@@ -19,387 +17,233 @@
   You should have received a copy of the GNU Affero General Public License
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 -->
-    
-<!-- First insert sample nodes -->
 
-<testcase>
-<name>PUT a sample node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/nodes/a</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT a sample node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/nodes/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT a sample node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/nodes/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox2</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<!-- Illegal PUT attempts -->
-
-<testcase>
-<name>PUT link with improper credentials</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/x/a</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>1.0</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link without a weight</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link with a non-float weight</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>a</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link with too negative of a weight</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>-1.0001</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link with too postiive of a weight</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>1.0001</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 400, 'expected a response code of 400 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link with non-existent from node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/doesntexist/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>1.0</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT link with non-existent to node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/doesntexist</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>1.0</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<!-- Legal PUTs -->
-
-<testcase>
-<name>PUT link without tags</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>0.0</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert json['weight'] == 0.0
-assert json['update_date']
-assert len(json['tags']) == 0
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>update link with new weight</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <weight>0.5</weight>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert json['weight'] == 0.5
-assert json['update_date']
-assert len(json['tags']) == 0
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>update link with tags</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/links/a/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <tags>tag1 tag2</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert json['weight'] == 0.5
-assert json['update_date']
-assert len(json['tags']) == 2
-assert 'tag1' in json['tags']
-assert 'tag2' in json['tags']
-</expectedOutput>
-</testcase>
-
-<!-- GET links -->
-
-<testcase>
-<name>GET link with non-existent from node</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/links/doesntexist/x</requestURL>
-<headers />
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>GET link with non-existent to node</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/links/a/doesntexist</requestURL>
-<headers />
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>GET link that doesn't exist</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/links/b/x</requestURL>
-<headers />
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>GET link</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/links/a/x</requestURL>
-<headers />
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<!-- DELETE links -->
-
-<testcase>
-<name>unauthorized DELETE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/links/x/a</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE non-existent from node</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/links/nonexistent/a</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE non-existent to node</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/links/a/nonexistent</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>legal link DELETE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/links/a/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<!-- Cleanup -->
-
-<testcase>
-<name>Cleanup #1</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/nodes/a</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>Cleanup #2</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/nodes/b</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>Cleanup #3</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/nodes/x</requestURL>
-<headers />
-<authentication>
-    <username>blackbox2</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
+<test>
+   <!-- First insert sample nodes -->
+   <testcase name="PUT a sample node">
+      <request method="PUT" url="http://localhost:8080/nodes/a?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="PUT a sample node">
+      <request method="PUT" url="http://localhost:8080/nodes/b?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="PUT a sample node">
+      <request method="PUT" url="http://localhost:8080/nodes/x?error_format=verbose_txt">
+         <auth username="blackbox2" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <!-- Illegal PUT attempts -->
+   <testcase name="PUT link with improper credentials">
+      <request method="PUT" url="http://localhost:8080/links/x/a">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">1.0</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>403</status>
+   </testcase>
+   
+   <testcase name="PUT link without a weight">
+      <request method="PUT" url="http://localhost:8080/links/a/b?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>400</status>
+   </testcase>
+   
+   <testcase name="PUT link with a non-float weight">
+      <request method="PUT" url="http://localhost:8080/links/a/b">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">a</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>400</status>
+   </testcase>
+   
+   <testcase name="PUT link with too negative of a weight">
+      <request method="PUT" url="http://localhost:8080/links/a/b">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">-1.0001</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>400</status>
+   </testcase>
+   
+   <testcase name="PUT link with too postiive of a weight">
+      <request method="PUT" url="http://localhost:8080/links/a/b">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">1.0001</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>400</status>
+   </testcase>
+   
+   <testcase name="PUT link with non-existent from node">
+      <request method="PUT" url="http://localhost:8080/links/doesntexist/b">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">1.0</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="PUT link with non-existent to node">
+      <request method="PUT" url="http://localhost:8080/links/a/doesntexist">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">1.0</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <!-- Legal PUTs -->
+   <testcase name="PUT link without tags">
+      <request method="PUT" url="http://localhost:8080/links/a/x">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">0.0</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert json['weight'] == 0.0
+         assert json['update_date']
+         assert len(json['tags']) == 0
+      </contents>
+   </testcase>
+   
+   <testcase name="update link with new weight">
+      <request method="PUT" url="http://localhost:8080/links/a/x">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="weight">0.5</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert json['weight'] == 0.5
+         assert json['update_date']
+         assert len(json['tags']) == 0
+      </contents>
+   </testcase>
+   
+   <testcase name="update link with tags">
+      <request method="PUT" url="http://localhost:8080/links/a/x">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag1 tag2</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert json['weight'] == 0.5
+         assert json['update_date']
+         assert len(json['tags']) == 2
+         assert 'tag1' in json['tags']
+         assert 'tag2' in json['tags']
+      </contents>
+   </testcase>
+   
+   <!-- GET links -->
+   <testcase name="GET link with non-existent from node">
+      <request method="GET" url="http://localhost:8080/links/doesntexist/x?error_format=verbose_txt"/>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="GET link with non-existent to node">
+      <request method="GET" url="http://localhost:8080/links/a/doesntexist?error_format=verbose_txt"/>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="GET link that doesn't exist">
+      <request method="GET" url="http://localhost:8080/links/b/x?error_format=verbose_txt"/>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="GET link">
+      <request method="GET" url="http://localhost:8080/links/a/x?error_format=verbose_txt"/>
+      <status>200</status>
+   </testcase>
+   
+   <!-- DELETE links -->
+   <testcase name="unauthorized DELETE">
+      <request method="DELETE" url="http://localhost:8080/links/x/a?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>403</status>
+   </testcase>
+   
+   <testcase name="DELETE non-existent from node">
+      <request method="DELETE" url="http://localhost:8080/links/nonexistent/a?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="DELETE non-existent to node">
+      <request method="DELETE" url="http://localhost:8080/links/a/nonexistent?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="legal link DELETE">
+      <request method="DELETE" url="http://localhost:8080/links/a/x?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <!-- Cleanup -->
+   <testcase name="Cleanup #1">
+      <request method="DELETE" url="http://localhost:8080/nodes/a?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="Cleanup #2">
+      <request method="DELETE" url="http://localhost:8080/nodes/b?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="Cleanup #3">
+      <request method="DELETE" url="http://localhost:8080/nodes/x?error_format=verbose_txt">
+         <auth username="blackbox2" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
 </test>

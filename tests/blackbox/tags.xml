@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<test>
-    
 <!--
-  Copyright 2009 Michael Whidby
+  Copyright 2009 Yusuf Simonson
   This file is part of Snowball.
   
   Snowball is free software: you can redistribute it and/or modify it under the
@@ -20,279 +18,182 @@
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<!-- Setting up some nodes to work with -->
-<testcase>
-<name>PUT a node without tags</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/nodes/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert len(json['tags']) == 0
-</expectedOutput>
-</testcase>
-
-<!-- Testing PUT -->
-<testcase>
-<name>PUT a sample tag, node DNE</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/tags/nothere</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <tags>tag1 tag2</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT a sample node, no tags</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 400, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT an update to a node, valid</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <tags>tag1 tag2</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert len(json['tags']) == 2
-assert 'tag1' in json['tags']
-assert 'tag2' in json['tags']
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT another update to a node, valid</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <tags>tag3</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert json['owner'] == 'blackbox1'
-assert json['type'] == 'node'
-assert json['id']
-assert len(json['tags']) == 3
-assert 'tag1' in json['tags']
-assert 'tag2' in json['tags']
-assert 'tag3' in json['tags']
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>PUT an update to a node, not user's node</name>
-<requestMethod>PUT</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox2</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody>
-    <tags>tag4</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<!-- Testing GET -->
-<testcase>
-<name>GET tags, node DNE</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>GET tags, node exists</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert json['owner'] == 'blackbox1'
-assert len(json['tags']) == 3
-assert 'tag1' in json['tags']
-assert 'tag2' in json['tags']
-assert 'tag3' in json['tags']
-</expectedOutput>
-</testcase>
-
-<!-- Testing DELETE -->
-
-<testcase>
-<name>DELETE tags, node DNE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, user has no access</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox2</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 403, 'expected a response code of 403 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, node DNE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/tags/doesnotexist</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 404, 'expected a response code of 404 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, tags specified STEP ONE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<inputbody type="post">
-    <tags>tag3</tags>
-</inputbody>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, tags specified STEP TWO</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert len(json['tags']) == 2
-assert 'tag1' in json['tags']
-assert 'tag2' in json['tags']
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, no tags specified STEP ONE</name>
-<requestMethod>DELETE</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-</expectedOutput>
-</testcase>
-
-<testcase>
-<name>DELETE tags, no tags specified STEP TWO</name>
-<requestMethod>GET</requestMethod>
-<requestURL>http://localhost:8080/tags/blackbox1</requestURL>
-<headers />
-<authentication>
-    <username>blackbox1</username>
-    <password>sandbox</password>
-</authentication>
-<expectedOutput type="python">
-assert response.code == 200, 'expected a response code of 200 but got %s instead' % response.code
-
-import simplejson
-json = simplejson.loads(contents)
-
-assert len(json['tags']) == 0
-</expectedOutput>
-</testcase>
-
+<test>
+   <!-- Setting up some nodes to work with -->
+   <testcase name="PUT a node without tags">
+      <request method="PUT" url="http://localhost:8080/nodes/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert len(json['tags']) == 0
+      </contents>
+   </testcase>
+   
+   <!-- Testing PUT -->
+   <testcase name="PUT a sample tag, node DNE">
+      <request method="PUT" url="http://localhost:8080/tags/nothere">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag1 tag2</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="PUT a sample node, no tags">
+      <request method="PUT" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>400</status>
+   </testcase>
+   
+   <testcase name="PUT an update to a node, valid">
+      <request method="PUT" url="http://localhost:8080/tags/blackbox1">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag1 tag2</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert len(json['tags']) == 2
+         assert 'tag1' in json['tags']
+         assert 'tag2' in json['tags']
+      </contents>
+   </testcase>
+   
+   <testcase name="PUT another update to a node, valid">
+      <request method="PUT" url="http://localhost:8080/tags/blackbox1">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag3</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert json['owner'] == 'blackbox1'
+         assert json['type'] == 'node'
+         assert json['id']
+         assert len(json['tags']) == 3
+         assert 'tag1' in json['tags']
+         assert 'tag2' in json['tags']
+         assert 'tag3' in json['tags']
+      </contents>
+   </testcase>
+   
+   <testcase name="PUT an update to a node, not user's node">
+      <request method="PUT" url="http://localhost:8080/tags/blackbox1">
+         <auth username="blackbox2" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag4</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>403</status>
+   </testcase>
+   
+   <!-- Testing GET -->
+   <testcase name="GET tags, node DNE">
+      <request method="GET" url="http://localhost:8080/tags/doesnotexist?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="GET tags, node exists">
+      <request method="GET" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert json['owner'] == 'blackbox1'
+         assert len(json['tags']) == 3
+         assert 'tag1' in json['tags']
+         assert 'tag2' in json['tags']
+         assert 'tag3' in json['tags']
+      </contents>
+   </testcase>
+   
+   <!-- Testing DELETE -->
+   <testcase name="DELETE tags, node DNE">
+      <request method="DELETE" url="http://localhost:8080/tags/doesnotexist?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>404</status>
+   </testcase>
+   <testcase name="DELETE tags, user has no access">
+      <request method="DELETE" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox2" password="sandbox"/>
+      </request>
+      <status>403</status>
+   </testcase>
+   
+   <testcase name="DELETE tags, node DNE">
+      <request method="DELETE" url="http://localhost:8080/tags/doesnotexist?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>404</status>
+   </testcase>
+   
+   <testcase name="DELETE tags, tags specified STEP ONE">
+      <request method="DELETE" url="http://localhost:8080/tags/blackbox1">
+         <auth username="blackbox1" password="sandbox"/>
+         <body type="post">
+            <param name="tags">tag3</param>
+            <param name="error_format">verbose_txt</param>
+         </body>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="DELETE tags, tags specified STEP TWO">
+      <request method="GET" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+      <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert len(json['tags']) == 2
+         assert 'tag1' in json['tags']
+         assert 'tag2' in json['tags']
+      </contents>
+   </testcase>
+   
+   <testcase name="DELETE tags, no tags specified STEP ONE">
+      <request method="DELETE" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+   </testcase>
+   
+   <testcase name="DELETE tags, no tags specified STEP TWO">
+      <request method="GET" url="http://localhost:8080/tags/blackbox1?error_format=verbose_txt">
+         <auth username="blackbox1" password="sandbox"/>
+      </request>
+      <status>200</status>
+         <contents type="python">
+         import simplejson
+         json = simplejson.loads(contents)
+         
+         assert len(json['tags']) == 0
+      </contents>
+   </testcase>
 </test>
-
