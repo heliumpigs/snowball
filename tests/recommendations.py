@@ -24,7 +24,8 @@ from math import sqrt
 def main():
     parser = settings_parser.SettingsParser(sys.argv, '[-s <seed>] <config file> <num tests>')
     
-    if len(parser.args) != 2: parser.error('Must specify number of tests to run')
+    if len(parser.args) != 2:
+        parser.error('Must specify number of tests to run')
     
     try:
         tests = int(parser.args[1])

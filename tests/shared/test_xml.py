@@ -22,25 +22,33 @@ except:
 def test():
     return et.Element('test')
     
-def testcase(root, name, method, url, username, password, expected_python, **params):
+def testcase(root, name, method, url, status=200, auth_creds=None, expected_python=None, **params):
     testcase = et.SubElement(root, 'testcase')
+    testcase.set('name', name)
     
-    et.SubElement(testcase, 'name').text = name
-    et.SubElement(testcase, 'requestMethod').text = method
-    et.SubElement(testcase, 'requestURL').text = url
-    et.SubElement(testcase, 'headers')
+    request = et.SubElement(testcase, 'request')
+    request.set('method', method)
+    request.set('url', url)
     
-    auth = et.SubElement(testcase, 'authentication')
-    et.SubElement(auth, 'username').username = username
-    et.SubElement(auth, 'password').password = password
+    if auth_creds:
+        auth = et.SubElement(request, 'auth')
+        auth.set('username', auth_creds[0])
+        auth.set('password', auth_creds[1])
+        
+    if len(params) > 0:
+        body = et.SubElement(request, 'body')
+        body.set('type', 'post')
+        
+        for key in params:
+            param = et.SubElement(body, 'param')
+            param.set('name', key)
+            param.text = str(params[key])
+            
+    et.SubElement(testcase, 'status').text = str(status)
     
-    input_body = et.SubElement(testcase, 'inputbody')
-    input_body.set('type', 'post')
-    for param in params: et.SubElement(input_body, param).text = params[param]
-    
-    expected_output = et.SubElement(testcase, 'expectedOutput')
-    expected_output.set('type', 'python')
-    expected_output.text = expected_python
+    contents = et.SubElement(testcase, 'contents')
+    contents.set('type', 'python')
+    contents.text = expected_python
     
     return testcase
 
