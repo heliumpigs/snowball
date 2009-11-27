@@ -18,4 +18,20 @@
 
 {% include header.html %}
 
+<p>
+    URI: <input id="nodeURI" type="text" />
+    return:
+    <select id="return">
+        <option>all recommendations</option>
+        <option>to a specific node</option>
+    </select>
+    
+    <div id="toNodeURIContainer"></div>
+    <div class="right">
+        <a href="javascript:getRecommendations()" class="button">query &raquo;</a>
+    </div>
+</p>
+
+<p id="recommendationsResults"></p>
+
 {% include footer.html %}

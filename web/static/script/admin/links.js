@@ -60,7 +60,7 @@ function getLinks() {
 
 $(function() {
     if(window.location.hash.length > 1) {
-        var parts = window.location.hash.substring(1).split(',');
+        var parts = window.location.hash.substring(1).split(',', 2);
         if(parts.length != 2) return;
         
         $('#direction').val(parts[0]);

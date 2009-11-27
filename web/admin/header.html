@@ -30,6 +30,7 @@
         <script type="text/javascript" src="{{ static_url('script/jquery-ui.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/json.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/ui.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('script/shared.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('script/admin/' + page + '.js') }}"></script>
     </head>
     <body>
@@ -38,7 +39,7 @@
         <div class="container_12">
             <div id="header" class="grid_4">
                 <a href="/admin" class="bold">snowball</a>
-                &raquo; <a href="/admin/{{ page }}">{{ page }}
+                &raquo; <a href="/admin/{{ page }}">{{ page }}</a>
                 <a id="subheader"></a>
             </div>
             <div id="tabs" class="grid_8">
@@ -51,7 +52,7 @@
             </div>
             <div class="clear"></div>
             
-            <div id="main" class="grid_12 body tab">
+            <div id="main" class="grid_12 body">
                 <div id="infoPanel" class="ui-widget" style="display: none;">
                     <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
                         <p>
