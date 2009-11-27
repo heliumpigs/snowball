@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, model, util
+import sys, model, util, scarecrow
 from math import sqrt
 
 def _weight(node, link):
@@ -26,7 +26,7 @@ def _links(db, node):
     """Gets the links to and from a node"""
     links = set(node.links)
     
-    for link_id in db.index('links_index', 'get_ids', id, model.account_key(node.owner)):
+    for link_id in db.index('links_index', 'get_ids', node.id, model.account_key(node.owner)):
         links.update(link_id)
     
     return links
@@ -99,8 +99,8 @@ def recommendation(node_store, from_node, to_node, settings):
     norm = util.get_dynamic_setting(node_store.db, 'max_score')
         
     #Replace the normalizer if the current score is greater than it
-    if norm == None or abs(score) > norm:
-        norm = abs(score)
+    if norm == None or norm == 0.0 or abs(score) > norm:
+        norm = abs(score) if score != 0.0 else 1.0
         util.save_dynamic_setting(node_store.db, 'max_score', norm)
     
     #Return the score divided by the normalizer to ensure that the final score
@@ -109,9 +109,9 @@ def recommendation(node_store, from_node, to_node, settings):
 
 def recommendations(node_store, node, tags, settings):
     """Gets the recommendations for a given node"""
-    max_nodes = settings['recommendations']['max_nodes']
-    max_visit = settings['recommendations']['max_visit']
-    min_threshold = settings['recommendations']['min_threshold']
+    max_nodes = settings['max_nodes']
+    max_visit = settings['max_visit']
+    min_threshold = settings['min_threshold']
     
     recommended = []
     

@@ -51,7 +51,7 @@ class RecommendationSetHandler(util.SnowballHandler):
     
     @util.error_handler
     def get(self, uri):
-        max_visit = self.application.settings['recommendations']['max_visit']
+        max_visit = self.application.settings['max_visit']
         
         tags = util.check_tags(self.get_argument('tags', ''))
         node_store = cache.NodeStore(self.db, max_visit + 1)
