@@ -61,11 +61,9 @@ def random_tags():
 
 def create_node_xml(root, host, num, account, *tags):
     name = 'Create node #%s' % num
+    url = 'http://%s/nodes/%s' % (host, num)
     
-    uri = '%s/%s' % (account, num)
-    url = 'http://%s/nodes/%s' % (host, urllib.quote(uri, ''))
-    
-    data = (uri, account)
+    data = (str(num), account)
     input_tags = ' '.join(tags)
     
     code = u"""
@@ -77,7 +75,7 @@ def create_node_xml(root, host, num, account, *tags):
         assert json['owner'] == '%s'
         assert json['type'] == 'node'
         assert json['id'] == '%s'
-        assert len(json['tags']) == %s""" % (account, uri, len(tags))
+        assert len(json['tags']) == %s""" % (account, num, len(tags))
     
     for tag in tags:
         code += u"\n        assert '%s' in json['tags']" % tag

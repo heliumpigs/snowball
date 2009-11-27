@@ -16,32 +16,57 @@
   along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function nodeValue() {
-    return $('#nodeURI').attr('value');
+function getNodeURL(uri) {
+    return '/nodes/' + encodeURIComponent(uri);
 }
 
-function getNodeURL() {
-    return '/nodes/' + encodeURIComponent(nodeValue());
+function displayLinks(json) {
+    var linkDiv = $('<div>');
+    
+    for(var link in json) {
+        var getLinkURL = function() {
+            var from = encodeURIComponent($('#nodeResultsId').val());
+            var to = encodeURIComponent(link);
+            return '/links/' + from + '/' + to;
+        };
+        
+        var updateLink = function() {
+            var username = $('#nodeResultsOwner').text();
+            var id = '#' + toIdentifier(link, false);
+            
+            params = {
+                'weight': $(id + 'Weight').val(),
+                'tags': $(id + 'Tags').val()
+            }
+            
+            authRequest('PUT', getLinkURL(), username, 'link successfully updated', params);
+        };
+        
+        var deleteLink = function() {
+            var onDelete = function() {
+                $('#' + toIdentifier(link, false)).remove();
+            };
+            
+            var username = $('#nodeResultsOwner').text();
+            authRequest('DELETE', getLinkURL(), username, 'link successfully deleted', null, onDelete);
+        };
+        
+        linkMap = [
+            'update date', json[link]['update_date'], false,
+            'weight', json[link]['weight'], true,
+            'tags', json[link]['tags'].join(' '), true
+        ]
+        
+        linkDiv.append(mapTable(link, linkMap, updateLink, deleteLink));
+    }
+    
+    return linkDiv;
 }
 
 function getNode() {
     if(nodeValue() == '') return showError('please specify a node');
     
     var success = function(json) {
-        var linkHtml = "";
-        var links = json['links'];
-        
-        for(var link in links) {
-            linkMap = [
-                'update date', links[link]['update_date'], false,
-                'weight', links[link]['weight'], false,
-                'tags', links[link]['tags'].join(', '), false
-            ]
-            
-            linkHtml += "<h2>" + link + "</h2>";
-            linkHtml += mapTable(linkMap);
-        }
-        
         var map = [
             'raw output', JSON.stringify(json), false,
             'id', json['id'], true,
@@ -49,15 +74,16 @@ function getNode() {
             'tags', json['tags'].join(' '), true,
             'creation date', json['creation_date'], false,
             'update date', json['update_date'], false,
-            'links', linkHtml, false
+            'links', displayLinks(json['links']), false
         ];
         
-        $("#nodeResults").html(mapTable(map, 'updateNode()', 'deleteNode()')).show();
+        $("#nodeResults").html(mapTable('node results', map, updateNode, deleteNode)).show();
+        breadcrumbs('nodes', nodeValue());
     };
 
     $.ajax({
         type: 'GET',
-        url: getNodeURL(),
+        url: getNodeURL(nodeValue()),
         dataType: 'json',
         data: 'format=json',
         
@@ -67,46 +93,24 @@ function getNode() {
 }
 
 function updateNode() {
-    var onAuth = function(dlg) {
-        var success = function() {
-            showInfo('node successfully updated');
-        };
-        
-        $.ajax({
-            type: 'PUT',
-            url: getNodeURL(),
-            dataType: 'json',
-            data: 'format=json',
-            username: $('#loginUsername').attr('value'),
-            password: $('#loginPassword').attr('value'),
-            
-            success: success,
-            error: failDialog
-        });
+    var url = getNodeURL(nodeValue());
+    var username = $('#nodeResultsOwner').text();
+    var params = {
+        'tags': $('nodeResultsTags').val()
     };
     
-    
-    authDialog($('#ownerValue').text(), onAuth);
+    authRequest('PUT', url, username, 'node successfully updated');
 }
 
 function deleteNode() {
-    var onAuth = function(dlg) {
-        var success = function() {
-            showInfo('node successfully deleted');
-            $('#nodeResults').empty();
-        };
-        
-        $.ajax({
-            type: 'DELETE',
-            url: getNodeURL(),
-            username: $('#loginUsername').attr('value'),
-            password: $('#loginPassword').attr('value'),
-            
-            success: success,
-            error: failDialog
-        });
-    };
-    
-    
-    authDialog($('#ownerValue').text(), onAuth);
+    var url = getNodeURL(nodeValue());
+    var username = $('#nodeResultsOwner').text();
+    authRequest('DELETE', url, username, 'node successfully deleted');
 }
+
+$(function() {
+    if(window.location.hash.length > 1) {
+        $('#nodeURI').val(window.location.hash.substring(1));
+        getNode();
+    }
+});

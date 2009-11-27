@@ -17,12 +17,12 @@
 */
 
 function getAccountURL() {
-    return '/admin/controller/accounts/' + encodeURIComponent($('#name').attr('value'));
+    return '/admin/controller/accounts/' + encodeURIComponent($('#name').val());
 }
 
 function createAccount() {
     var success = function(json) {
-        dialog('huzzah!', 'account created', true);
+        showInfo('account successfully created');
     };
     
     $.ajax({
@@ -31,7 +31,7 @@ function createAccount() {
         dataType: 'json',
         data: {
             'format': 'json',
-            'password': $('password').attr('value')
+            'password': $('password').val()
         },
         
         success: success,
@@ -41,7 +41,7 @@ function createAccount() {
 
 function deleteAccount() {
     var success = function(json) {
-        dialog('huzzah!', 'account deleted', true);
+        showInfo('account successfully deleted');
     };
     
     $.ajax({
@@ -50,7 +50,7 @@ function deleteAccount() {
         dataType: 'json',
         data: {
             'format': 'json',
-            'password': $('password').attr('value')
+            'password': $('password').val()
         },
         
         success: success,

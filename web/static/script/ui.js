@@ -17,6 +17,19 @@
 */
 
 var timeoutId = null;
+var curTab = null;
+
+function tab(name) {
+    if(curTab) {
+        $('#' + curTab).fadeOut(100, function() {
+            $('#' + name).fadeIn(100);
+        });
+    } else {
+        $('#' + name).fadeIn(100);
+    }
+    
+    curTab = name;
+}
 
 function showPanel(name, message) {
     if(timeoutId) clearTimeout(timeoutId);
@@ -33,14 +46,10 @@ function showError(message) {
     showPanel('error', message);
 }
 
-function breadcrumbs() {
-    var text = '';
-    
-    for(var i=0; i<arguments.length; i++) {
-        text += ' \u00BB ' + arguments[i];
-    }
-    
-    $('#subheader').text(text);
+function breadcrumbs(root, name, hash) {
+    if(hash == undefined || hash == null) hash = name;
+    window.location.hash = '#' + hash;
+    $('#subheader').html(' \u00BB <a href="/admin/' + root + "#" + hash + '">' + name + '</a>');
 }
 
 function dialog(title, contents, ok, cancel) {
@@ -99,47 +108,78 @@ function authDialog(username, callback) {
     
     html = "this action requires authentication<br />"
          + "username: <input id='loginUsername' type='text' value='" + username + "' " + disabled + " /><br />"
-         + "password: <input id='loginPassword' type='text' />";
+         + "password: <input id='loginPassword' type='password' />";
          
     dialog('login', html, callback, true);
 }
 
-function mapTable(map, updateFunc, deleteFunc) {
-    table = "<table><tr><th class='attrHeader'>attribute</th><th class='attrValue'>value</th></tr>";
-        
-    for(var i=0; i<map.length; i+=3) {
-        var cssClass = '';
-        if(i % 2 == 1) cssClass = 'zebra';
-        
-        table += "<tr class='" + cssClass + "'><td>" + map[i] + "</td>";
-        
-        if(map[i + 2] == true) {
-            table += "<td><input id='" + map[i] + "Value' type='text' value='" + map[i + 1] + "' /></td>";
-        } else {
-            table += "<td id='" + map[i] + "Value'>" + map[i + 1] + "</td>";
-        }
-        
-        table += "</tr>";
+function toIdentifier(name, ucc) {
+    var toUCC = function(value) {
+        return value.substring(0, 1).toUpperCase() + value.substring(1);
+    };
+    
+    var parts = name.split(' ');
+    if(ucc) {
+        var id = toUCC(parts[0]);
+    } else {
+        var id = parts[0];
     }
     
-    table += "</table>";
+    for(var i=1; i<parts.length; i++) {
+        id += toUCC(parts[i]);
+    }
+    
+    return id;
+}
+
+function mapTable(name, map, updateFunc, deleteFunc) {
+    var getId = function(fieldName) {
+        return toIdentifier(name, false) + toIdentifier(fieldName, true);
+    };
+    
+    var appendButton = function(value, func) {
+        button = $("<input type='button' value='" + value + "' class='button' />");
+        button.click(func);
+        div.append(button);
+    };
+
+    div = $('<div>');
+    div.attr('id', name);
+    div.append('<h2>' + name + '</h2>')
+    
+    table = $('<table>');
+    div.append(table);
+    table.append("<tr><th class='attrHeader'>attribute</th><th class='attrValue'>value</th></tr>");
+    
+    for(var i=0; i<map.length; i+=3) {
+        row = $('<tr>');
+        table.append(row);
+        if(i % 2 == 1) row.attr('class', 'zebra');
+        
+        row.append("<td>" + map[i] + "</td>");
+        
+        td = $('<td>');
+        row.append(td);
+        
+        if(map[i + 2] == true) {
+            input = $('<input>');
+            td.append(input);
+            
+            input.attr('id', getId(map[i]));
+            input.attr('value', map[i + 1]);
+        } else {
+            td.attr('id', getId(map[i]));
+            td.html(map[i + 1]);
+        }
+    }
     
     if(updateFunc) {
-        table += "<input type='button' value='update' class='button' onclick='" + updateFunc + "' />"
+        appendButton('update', updateFunc);
     }
     
     if(deleteFunc) {
-        table += "<input type='button' value='delete' class='button' onclick='" + deleteFunc + "' />"
+        appendButton('delete', deleteFunc);
     }
     
-    return table;
+    return div;
 }
-
-$(function() {
-    curTab = $('.tab:first').attr('id');
-    if(window.location.hash.length > 1) {
-        tab(window.location.hash.substring(1));
-    } else {
-        $('#' + curTab).fadeIn(100);
-    }
-});

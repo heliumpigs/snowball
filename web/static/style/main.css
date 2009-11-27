@@ -50,7 +50,7 @@ textarea {
 }
 
 input {
-    width: 80%;
+    width: 70%;
 }
 
 table {
@@ -150,4 +150,13 @@ a.button:hover {
 
 .mini {
     width: 40%;
+}
+
+.tab {
+    display: none;
+    padding-top: 15px;
+}
+
+.alignedLabel {
+    width: 15em;
 }

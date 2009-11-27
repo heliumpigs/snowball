@@ -32,12 +32,16 @@ class AdminHandler(util.SnowballHandler):
     @basic_auth(REALM, admin_auth)
     def get(self, path):
         if path == '' or path == '/' or path == '/nodes':
+            print 'a'
             self.render('nodes.html', page='nodes')
         elif path == '/links':
+            print 'b'
             self.render('links.html', page='links')
         elif path == '/recommendations':
+            print 'd'
             self.render('recommendations.html', page='recommendations')
         elif path == '/accounts':
+            print 'e'
             self.render('accounts.html', page='accounts')
         else:
             raise web.HTTPError(404, 'not found')
