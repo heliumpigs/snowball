@@ -14,16 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'shared'))
-
 try:
     import xml.etree.cElementTree as et
 except:
     import xml.etree.ElementTree as et
+    
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
-import optparse, random, urllib, re, test_xml
-from xml.dom import minidom
+import optparse, random, re, sys
+from catnap import model, util
 
 ACCOUNTS = (
     'site1',
@@ -59,14 +61,14 @@ def random_tags():
         
     return tags
 
-def create_node_xml(root, host, num, account, *tags):
+def create_node(host, num, account, *tags):
     name = 'Create node #%s' % num
     url = 'http://%s/nodes/%s' % (host, num)
     
     data = (str(num), account)
     input_tags = ' '.join(tags)
     
-    code = u"""
+    code = util.detab_contents(u"""
         import simplejson
         json = simplejson.loads(contents)
         
@@ -75,68 +77,85 @@ def create_node_xml(root, host, num, account, *tags):
         assert json['owner'] == '%s'
         assert json['type'] == 'node'
         assert json['id'] == '%s'
-        assert len(json['tags']) == %s""" % (account, num, len(tags))
+        assert len(json['tags']) == %s""" % (account, num, len(tags)))
     
     for tag in tags:
-        code += u"\n        assert '%s' in json['tags']" % tag
+        code += u"\nassert '%s' in json['tags']" % tag
         
-    test_xml.testcase(root, name, 'PUT', url, 200, (account, 'sandbox'), code, tags=input_tags)
-    return data
+    request_body = model.RequestBody('post')
+    request_body.value['tags'] = input_tags
+    expected_body = model.ExpectedBody('python', code)
+        
+    test = model.TestCase(name, 'PUT', url, headers={}, auth=(account, 'sandbox'),
+                          body=request_body, expected_status=200, expected_body=expected_body)
+    
+    test.id = num
+    return test
 
-def create_link_xml(root, host, num, from_node, to_node, weight, *tags):
-    name = 'Create link #%s' % num
-    url = 'http://%s/links/%s/%s' % (host, urllib.quote(from_node[0], ''), urllib.quote(to_node[0], ''))
+def create_link(host, from_node, to_node, weight, *tags):
+    name = 'Create link from %s to %s' % (from_node.id, to_node.id)
+    url = 'http://%s/links/%s/%s' % (host, from_node.id, to_node.id)
     input_tags = ' '.join(tags)
     
-    code = u"""
+    code = util.detab_contents(u"""
         import simplejson
         json = simplejson.loads(contents)
         
         assert json['update_date']
         assert json['weight'] == %s
-        assert len(json['tags']) == %s""" % (weight, len(tags))
+        assert len(json['tags']) == %s""" % (weight, len(tags)))
     
     for tag in tags:
-        code += u"\n        assert '%s' in json['tags']" % tag
+        code += u"\nassert '%s' in json['tags']" % tag
         
-    test_xml.testcase(root, name, 'PUT', url, 200, (from_node[1], 'sandbox'), code, tags=input_tags, weight=weight)
+    request_body = model.RequestBody('post')
+    request_body.value['tags'] = input_tags
+    request_body.value['weight'] = str(weight)
+    expected_body = model.ExpectedBody('python', code)
+    
+    return model.TestCase(name, 'PUT', url, headers={}, auth=(from_node.auth[0], 'sandbox'),
+                          body=request_body, expected_status=200, expected_body=expected_body)
     
 def main():
-    parser = optparse.OptionParser("usage: %prog [-s <seed>] <host> <number of nodes>")
+    parser = optparse.OptionParser("usage: %prog [-s <seed>] <host> <number of nodes> <output file>")
     parser.add_option('-s', '--seed', dest='seed', type='int', default=None, help='Seed for randomization')
     
     (options, args) = parser.parse_args()
     
     #check to make sure required arguments have been passed in
-    if len(args) != 2:
+    if len(args) != 3:
         parser.error('Missing required arguments')
     
     if options.seed:
         random.seed(options.seed)
         
+    host = args[0]
+    if host.startswith('http://'):
+        host = host[7:]
+    if host.endswith('/'):
+        host = host[:-1]
+        
     try:    
         n = int(args[1])
+        assert n > 0
     except:
-        parser.error('Number of nodes argument must be an integer')
+        parser.error('Number of nodes argument must be an integer greater than 0')
         
-    host = args[0]
-    root = test_xml.test()
-    
+    output_file = args[2]
+        
     nodes = []
-    for i in range(0, n):
+    for i in xrange(0, n):
         tags = random_tags()
         account = random.choice(ACCOUNTS)
-        
-        node_data = create_node_xml(root, host, i, account, *tags)
-        nodes.append(node_data)
+        nodes.append(create_node(host, i, account, *tags))
     
-    i = 0
+    tests = []
+    tests.extend(nodes)
+    
     for node in nodes:
         links = set([])
         
-        for j in range(0, random_link_count()):
-            i += 1
-            
+        for i in xrange(0, random_link_count()):
             from_node = None
             attempts = 0
             while (from_node is None or from_node == node or from_node in links) and attempts < 10:
@@ -147,8 +166,9 @@ def main():
             tags = random_tags()
             weight = random.random() * 2 - 1
             
-            create_link_xml(root, host, i, from_node, node, weight, *tags)
+            tests.append(create_link(host, from_node, node, weight, *tags))
             
-    et.ElementTree(root).write(sys.stdout)
+    with open(output_file, 'w') as file:
+        pickle.dump(tests, file)
 
 if __name__ == '__main__': main()

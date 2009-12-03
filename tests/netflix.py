@@ -14,15 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Snowball.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'shared'))
-
 try:
     import xml.etree.cElementTree as et
 except:
     import xml.etree.ElementTree as et
+    
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
-import optparse, datetime, urllib, test_xml
+import optparse, datetime, urllib, sys, os
+from catnap import model, util
 
 MOVIE_TEMPLATE = 'netflix.com/movie/%s'
 CUSTOMER_TEMPLATE = 'netflix.com/customer/%s'
@@ -33,12 +36,54 @@ def main():
     
     if len(args) != 4:
         parser.error('Missing required arguments')
-    
-    global host
+        
+    global host, output_dir, movie_descriptor, input_dir
     host = args[0]
+    if host.startswith('http://'):
+        host = host[7:]
+    if host.endswith('/'):
+        host = host[:-1]
+    
     output_dir = os.path.join(os.path.dirname(__file__), args[1])
     movie_descriptor = os.path.join(os.path.dirname(__file__), args[2])
     input_dir = os.path.join(os.path.dirname(__file__), args[3])
+    movies, customers, links = parse_data()
+    
+    #Write the movies
+    print 'Creating movies tests'
+    movie_tests = []
+    for movie in movies:
+        movie_tests.append(create_movie(movie, *movies[movie]))
+    write_file('movies', movie_tests)
+    
+    #Write the customers
+    print 'Creating customers tests'
+    customer_tests = []
+    for customer in customers:
+        customer_tests.append(create_customer(customer))
+    write_file('customers', customer_tests)
+    
+    #Write the links
+    print 'Creating links tests'
+    links_tests = []
+    for link in links:
+        links_tests.append(create_link(link[0], link[1], *links[link]))
+    write_file('links', links_tests)
+    
+def parse_data():
+    global output_dir, movie_descriptor, input_dir
+    
+    cache_file = os.path.join(output_dir, 'cache')
+    if os.path.exists(cache_file):
+        print 'Cache file found at ' + cache_file
+        print 'Loading cache'
+        
+        try:
+            with open(cache_file, 'r') as file:
+                return pickle.load(file)
+        except Exception, e:
+            sys.stderr.write('Error reading cache, reprocessing data\n')
+            sys.stderr.write('Cause: ' + str(e) + '\n')
     
     movies = {}
     customers = set([])
@@ -74,43 +119,34 @@ def main():
             
             customers.add(customer_id)
             links[(customer_id, movie_id)] = (rating, date)
+            
+    try:
+        with open(cache_file, 'w') as file:
+            print 'Writing cache'
+            pickle.dump((movies, customers, links), file)
+    except Exception, e:
+        sys.stderr.write('Error writing cache\n')
+        sys.stderr.write('Cause: ' + str(e) + '\n')
+        
+    return movies, customers, links
     
-    #Write the movies
-    movie_root = test_xml.test()
-    i = 0
-    for movie in movies:
-        create_movie_node(movie_root, i, movie, *movies[movie])
-        i += 1
-    write_file('movies', movie_root)
+def write_file(name, tests):
+    global output_dir
+    path = os.path.join(output_dir, '%s.p' % name)
     
-    #Write the customers
-    customer_root = test_xml.test()
-    i = 0
-    for customer in customers:
-        create_customer_node(customer_root, i, customer)
-        i += 1
-    write_file('customers', customer_root)
+    with open(path, 'w') as file:
+        pickle.dump(tests, file)
     
-    #Write the links
-    links_root = test_xml.test()
-    i = 0
-    for link in links:
-        create_link(links_root, i, link[0], link[1], *links[link])
-        i += 1
-    write_file('links', links_root)
-    
-def write_file(name, root):
-    ElementTree(root).write(name + '.xml')
-    del root
+    del tests
      
-def _create_node(root, i, uri, *tags):
+def _create_testcase(uri, *tags):
     global host
     
-    name = 'Create node #%s' % i
+    name = 'Create node %s' % uri
     url = 'http://%s/nodes/%s' % (host, urllib.quote(uri, ''))
     input_tags = ' '.join(tags)
     
-    code = u"""
+    code = util.detab_contents(u"""
         import simplejson
         json = simplejson.loads(contents)
         
@@ -119,43 +155,53 @@ def _create_node(root, i, uri, *tags):
         assert json['owner'] == 'netflix.com'
         assert json['type'] == 'node'
         assert json['id'] == '%s'
-        assert len(json['tags']) == %s""" % (uri, len(tags))
+        assert len(json['tags']) == %s""" % (uri, len(tags)))
     
     for tag in tags:
-        code += u"\n        assert '%s' in json['tags']" % tag
+        code += u"\nassert '%s' in json['tags']" % tag
         
-    test_xml.testcase(root, name, 'PUT', url, 200, ('netflix.com', 'sandbox'), code, tags=input_tags)
+    request_body = model.RequestBody('post')
+    request_body.value['tags'] = input_tags
+    expected_body = model.ExpectedBody('python', code)
+    
+    return model.TestCase(name, 'PUT', url, headers={}, auth=('netflix.com', 'sandbox'),
+                          body=request_body, expected_status=200, expected_body=expected_body)
 
-def create_movie_node(root, i, movie_id, title, year):
+def create_movie(movie_id, title, year):
     url = MOVIE_TEMPLATE % movie_id
     
     #TODO: fetch more tags
     tags = []
     if year != None: tags.append(str(year))
     
-    _create_node(root, i, url, 'movie', *tags)
+    return _create_testcase(url, 'movie', *tags)
 
-def create_customer_node(root, i, customer_id):
+def create_customer(customer_id):
     url = CUSTOMER_TEMPLATE % customer_id
-    _create_node(root, i, url, 'customer')
+    return _create_testcase(url, 'customer')
 
-def create_link(root, i, customer_id, movie_id, rating, rating_date):
-    name = 'Create link #%s' % i
+def create_link(customer_id, movie_id, rating, rating_date):
+    name = 'Create link from customer %s to movie %s' % (customer_id, movie_id)
     rating = 0.5 * (rating - 3)
     
     customer_uri = CUSTOMER_TEMPLATE % customer_id
     movie_uri = MOVIE_TEMPLATE % movie_id
     url = 'http://%s/links/%s/%s' % (host, urllib.quote(customer_uri, ''), urllib.quote(movie_uri, ''))
     
-    code = u"""
+    code = util.detab_contents(u"""
         import simplejson
         json = simplejson.loads(contents)
         
         assert json['update_date']
         assert json['weight'] == %s
         assert json['tags'] == []
-        """ % rating
-        
-    test_xml.testcase(root, name, 'PUT', url, 200, ('netflix.com', 'sandbox'), code, weight=rating)
+        """ % rating)
+    
+    request_body = model.RequestBody('post')
+    request_body.value['weight'] = str(rating)
+    expected_body = model.ExpectedBody('python', code)
+    
+    return model.TestCase(name, 'PUT', url, headers={}, auth=('netflix.com', 'sandbox'),
+                          body=request_body, expected_status=200, expected_body=expected_body)
     
 if __name__ == '__main__': main()
