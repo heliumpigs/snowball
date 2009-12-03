@@ -61,6 +61,10 @@ th {
     text-align: left;
 }
 
+code {
+    font-family: monospace;
+}
+
 #header {
     margin-top: 0.5em;
     height: 45px;

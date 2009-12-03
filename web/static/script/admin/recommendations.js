@@ -48,6 +48,11 @@ function getRecommendationsToNode() {
 
 function getAllRecommendations() {
     var success = function(json) {
+        if(json.length == 0) {
+            showInfo('no recommendations available for this node');
+            return;
+        }
+        
         var ol = $('<ol>');
             
         for(var i=0; i<json.length; i++) {
@@ -57,7 +62,7 @@ function getAllRecommendations() {
         }
         
         $('#recommendationsResults').html(ol);
-    }
+    };
     
     $.ajax({
         type: 'GET',

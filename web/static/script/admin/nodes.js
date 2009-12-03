@@ -67,8 +67,10 @@ function getNode() {
     if(nodeValue() == '') return showError('please specify a node');
     
     var success = function(json) {
+        var rawOutput = $('<code>' + JSON.stringify(json, null, 1) + '</code>');
+        
         var map = [
-            'raw output', JSON.stringify(json), false,
+            'raw output', rawOutput, false,
             'id', json['id'], true,
             'owner', json['owner'], false,
             'tags', json['tags'].join(' '), true,

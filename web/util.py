@@ -130,6 +130,7 @@ def save_dynamic_setting(db, name, value):
         settings = db[settings_ident]
     except KeyError:
         settings = model.Storage()
+        settings.type = 'settings'
     
     settings[name] = value
     db[settings_ident] = settings
