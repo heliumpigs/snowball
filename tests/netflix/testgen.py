@@ -31,13 +31,17 @@ MOVIE_TEMPLATE = 'netflix.com/movie/%s'
 CUSTOMER_TEMPLATE = 'netflix.com/customer/%s'
 
 def main():
-    parser = optparse.OptionParser("usage: %prog <host> <output dir> <movie descriptor> <input dir>")
+    parser = optparse.OptionParser("usage: %prog <host> <output dir> <movie descriptor> <input dir> [-c <cache size>]")
+    parser.add_option('-c', '--cache', dest='cache', type='int', default=5000, help='Size of the cache (default 5000)')
     (options, args) = parser.parse_args()
     
     if len(args) != 4:
         parser.error('Missing required arguments')
         
-    global host, output_dir, movie_descriptor, input_dir
+    global host, output_dir, movie_descriptor, input_dir, cache_size
+    
+    cache_size = options.cache
+    
     host = args[0]
     if host.startswith('http://'):
         host = host[7:]
@@ -50,25 +54,36 @@ def main():
     movies, customers, links = parse_data()
     
     #Write the movies
-    print 'Creating movies tests'
-    movie_tests = []
-    for movie in movies:
-        movie_tests.append(create_movie(movie, *movies[movie]))
-    write_file('movies', movie_tests)
+    movie_fun = lambda movie: create_movie(movie, *movies[movie])
+    create_tests('movies', movies, movie_fun)
     
     #Write the customers
-    print 'Creating customers tests'
-    customer_tests = []
-    for customer in customers:
-        customer_tests.append(create_customer(customer))
-    write_file('customers', customer_tests)
+    customer_fun = lambda customer: create_customer(customer)
+    create_tests('customers', customers, customer_fun)
     
     #Write the links
-    print 'Creating links tests'
-    links_tests = []
-    for link in links:
-        links_tests.append(create_link(link[0], link[1], *links[link]))
-    write_file('links', links_tests)
+    links_fun = lambda link: create_link(link[0], link[1], *links[link])
+    create_tests('links', links, links_fun)
+    
+def create_tests(name, input, fun, *args):
+    global output_dir, cache_size
+    print 'Creating %s tests' % name
+    
+    tests = []
+    i = 0
+    
+    for item in input:
+        tests.append(fun(item, *args))
+        
+        i += 1
+        if i % cache_size == 0:
+            path = os.path.join(output_dir, '%s_%s.p' % (name, i))
+            
+            print 'Writing file %s' % path
+            with open(path, 'w') as file:
+                pickle.dump(tests, file)
+            
+            tests = []
     
 def parse_data():
     global output_dir, movie_descriptor, input_dir
@@ -129,15 +144,6 @@ def parse_data():
         sys.stderr.write('Cause: ' + str(e) + '\n')
         
     return movies, customers, links
-    
-def write_file(name, tests):
-    global output_dir
-    path = os.path.join(output_dir, '%s.p' % name)
-    
-    with open(path, 'w') as file:
-        pickle.dump(tests, file)
-    
-    del tests
      
 def _create_testcase(uri, *tags):
     global host
