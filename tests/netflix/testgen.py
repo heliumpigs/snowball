@@ -77,13 +77,18 @@ def create_tests(name, input, fun, *args):
         
         i += 1
         if i % cache_size == 0:
-            path = os.path.join(output_dir, '%s_%s.p' % (name, i))
-            
-            print 'Writing file %s' % path
-            with open(path, 'w') as file:
-                pickle.dump(tests, file)
-            
+            write_file(name, i, tests)
             tests = []
+            
+    write_file(name, i, tests)
+    del tests
+            
+def write_file(name, i, tests):
+    path = os.path.join(output_dir, '%s_%s.p' % (name, i))
+    
+    print 'Writing file %s' % path
+    with open(path, 'w') as file:
+        pickle.dump(tests, file)
     
 def parse_data():
     global output_dir, movie_descriptor, input_dir
