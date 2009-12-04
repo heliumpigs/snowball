@@ -57,7 +57,7 @@ class SettingsParser(OptionsParser):
         try:
             settings_container = __import__('settings', globals(), locals(), [self.args[0]], -1)
             settings_file = getattr(settings_container, self.args[0])
-        except ImportError or AttributeError:
+        except (ImportError, AttributeError):
             self.error('Could not find settings file settings/%s.py' % self.args[0])
         except IndexError:
             self.error('Please specify a settings profile')
