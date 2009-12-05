@@ -42,8 +42,9 @@ def _parts(node, links):
     """
     sum = _summation(node, links, lambda x: x)
     squared_sum = _summation(node, links, lambda x: x ** 2)
+    sub = (sum ** 2) / len(links) if len(links) > 0 else 0
     
-    return sum, squared_sum - (sum ** 2) / len(links)
+    return sum, squared_sum - sub
     
 def similarity(node_store, first, second):
     """Returns the similarity between two nodes"""
@@ -55,7 +56,7 @@ def similarity(node_store, first, second):
     first_sum, first_divisor = _parts(first, links)
     second_sum, second_divisor = _parts(second, links)
     
-    numerator = (mul_sum - first_sum * second_sum / len(links))
+    numerator = (mul_sum - first_sum * second_sum / len(links)) if len(links) > 0 else 0
     divisor = sqrt(first_divisor * second_divisor)
     
     if divisor == 0.0:

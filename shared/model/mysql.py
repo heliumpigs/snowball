@@ -43,7 +43,8 @@ class MysqlLinksIndex(object):
                 
     def get(self, db, to_link, owner=None):
         to_link = scarecrow.ident(to_link)
-        if owner: owner = scarecrow.ident(owner)
+        if owner:
+            owner = scarecrow.ident(owner)
         
         query = "SELECT body FROM entities JOIN %s ON entities.id=%s.entity_id WHERE to_link=%s" % (self.name, self.name, '%s')
         
@@ -61,7 +62,8 @@ class MysqlLinksIndex(object):
                 
     def get_ids(self, db, to_link, owner=None):
         to_link = scarecrow.ident(to_link)
-        if owner: owner = scarecrow.ident(owner)
+        if owner:
+            owner = scarecrow.ident(owner)
         
         query = "SELECT entity_id FROM entities JOIN %s ON entities.id=%s.entity_id WHERE to_link=%s" % (self.name, self.name, '%s')
         
@@ -85,7 +87,7 @@ class MysqlLinksIndex(object):
         
         results = db.query("SELECT entity_id, to_link FROM %s ORDER BY RAND(%s) LIMIT %s" % (self.name, seed, count))
         for row in results:
-            yield scarecrow.ScarecrowIdent(row.entity_id), scarerow.ScarecrowIdent(row.to_link)
+            yield scarecrow.ScarecrowIdent(row.entity_id), scarecrow.ScarecrowIdent(row.to_link)
 
 def db(host, dbname, user, password):
     links_index = MysqlLinksIndex('links_index')
