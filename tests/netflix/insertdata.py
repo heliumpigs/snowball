@@ -29,9 +29,9 @@ def main():
     test_dir = args[1]
     threads = options.threads
     
-    p1, f1 = run('movies')    
-    p2, f2 = run('customers')
-    p3, f3 = run('links')
+    p1, f1 = run('movies.p')    
+    p2, f2 = run('*.customers.p')
+    p3, f3 = run('*.ratings.p')
     
     passed = p1 + p2 + p3
     failed = f1 + f2 + f3
@@ -40,15 +40,15 @@ def main():
     print '    Total Passed: %s' % passed
     print '    Total Failed: %s' % failed
     
-def run(prefix):
+def run(pattern):
     global client_path, test_dir, threads
     
-    pattern = os.path.join(test_dir, '%s_*.p' % prefix)
+    pattern = os.path.join(test_dir, pattern)
     passed = 0
     failed = 0
     
     for file in glob.glob(pattern):
-        output_file = os.path.basename(file) + '.txt'
+        output_file = os.path.basename(file) + '.results.txt'
         output_path = os.path.join(test_dir, output_file)
         
         print 'Running %s' % file
@@ -59,11 +59,11 @@ def run(prefix):
         
         line = lines[-2]
         index = line.find('PASSED: ')
-        passed += int(line[index + 14:])
+        passed += int(line[index + 8:])
         
         line = lines[-1]
         index = line.find('FAILED: ')
-        failed += int(line[index + 14:])
+        failed += int(line[index + 8:])
         
         file.close()
         
